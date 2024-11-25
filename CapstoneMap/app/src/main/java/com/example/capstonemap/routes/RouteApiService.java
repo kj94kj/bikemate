@@ -21,6 +21,7 @@ public interface RouteApiService {
     Call<List<RouteDto>> getAllRoutes();
 
     // 만들었거나 즐겨찾기 한 루트를 볼 수 있음
+    // 여기서 유저가 선택한 루트 정보도 볼 수 있어야하고, 루트의 encodedString도 따로 저장해야함.
     @GET("/api/users/{userId}/routes")
     Call<List<RouteDto>> getUserRoutes(@Path("userId") Long userId);
 

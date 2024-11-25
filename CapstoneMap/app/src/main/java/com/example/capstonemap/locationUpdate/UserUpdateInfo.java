@@ -5,6 +5,10 @@ package com.example.capstonemap.locationUpdate;
 // UserUpdateDto에 루트가 끝나면 갱신하거나 OldUserRecord를 가져오는 클래스
 // 아마 userId와 routeId를 밖에서 받을 수 있을 것 같다.
 
+import com.example.capstonemap.distance.DistancePolyLine;
+import com.example.capstonemap.distance.DistanceTwoLocation;
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,13 +41,35 @@ public class UserUpdateInfo {
 
     private List<Double[]> locationList;
 
+    private int ranking;
+
     private UserRecordDto myRecordDto = new UserRecordDto(userId, routeId);
     private UserRecordDto oldMyRecord;
     private UserRecordDto oldOtherRecord;
 
+    // 현재 유저의 시작점부터 거리, 기록 유저의 시작점부터 거리를 계산해서 넣어줄거임
+    private double currentDistance = 0;
+    private double oldDistance = 0;
+
+    // 현재 달리고있는 폴리라인의 List<LatLng>을 set해야함.
+    private List<LatLng> polyline;
+
+
+
+    // 기록 유저의 n초마다의 위치를 set하기 위해 만듦
     public void setOldLocation(){
         oldLocation=oldMyRecord.getLocationList().get(counter);
         counter++;
+    }
+
+    public int rankingNow(){
+        double meDistance = DistancePolyLine.calculateProgress(DistanceTwoLocation.doubleToLatLng(currentLocation), polyline);
+        double otherDistance = DistancePolyLine.calculateProgress(DistanceTwoLocation.doubleToLatLng(currentLocation), polyline);
+
+        if(meDistance - otherDistance > 0)
+            return 1;
+        else
+            return 2;
     }
 
     public UserUpdateInfo(Long userId, Long routeId){

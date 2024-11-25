@@ -52,4 +52,9 @@ public class GetUserRoutes {
         }
         binding.routeTextView.setText(routesText.toString());
     }
+
+    // 인덱스로 루트 선택함.
+    public static RouteDto selectRoute(int index){
+        return userRouteDtoList.get(index);
+    }
 }

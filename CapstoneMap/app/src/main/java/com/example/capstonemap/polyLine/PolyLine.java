@@ -24,6 +24,7 @@
 
     // 폴리라인을 길에 맞춰 그리는 함수 구현
 
+    //폴리라인은 encodedString을 가져와 List<LatLng>으로 만든다음 그점들을 이어 그리는 것이다.
     public class PolyLine {
         RouteRepository routeRepository=new RouteRepository();
 
@@ -161,7 +162,7 @@
             // 저장된 Polyline 객체를 가져와 지도에서 제거
             Polyline polyline = polylineMap.get(encodedPath);
             if (polyline != null) {
-                polyline.remove();  // 지도에서 폴리라인 제거
+                polyline.remove();  // 지도에서 폴리라a인 제거
                 Log.d("REMOVE_POLYLINE", "Polyline removed for path: " + encodedPath);
             } else {
                 Log.e("REMOVE_POLYLINE", "No Polyline found for path: " + encodedPath);
