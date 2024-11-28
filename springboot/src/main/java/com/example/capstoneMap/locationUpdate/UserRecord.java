@@ -36,13 +36,13 @@ public class UserRecord {
 	@Column
 	private Long routeId;
 	
-	private double elapsedTime;
+	private Long elapsedTime;
 	private String locationListJson;
 	
     @Transient
 	private List<Double[]> locationList;
 	
-	public UserRecord(Long id, double elapsedTime, String locationListJson) {
+	public UserRecord(Long id, Long elapsedTime, String locationListJson) {
 		this.id=id;
 		this.elapsedTime=elapsedTime;
 		this.locationListJson=locationListJson;

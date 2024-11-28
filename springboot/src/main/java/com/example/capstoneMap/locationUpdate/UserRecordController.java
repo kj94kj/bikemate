@@ -30,12 +30,12 @@ public class UserRecordController {
         return userRecordService.saveRecord(userRecordDto, userId, routeId);
     }
     
-    @GetMapping("/api/users/{userId}/{routeId}/myOldRecord")
+    @GetMapping("/users/{userId}/{routeId}/myOldRecord")
     public ResponseEntity<UserRecord> getMyOldRecord(@PathVariable("userId") Long userId, @PathVariable("routeId") Long routeId){
     	return userRecordService.getMyOldRecord(userId, routeId);
     }
     
-    @GetMapping("/api/users/{userId}/{routeId}/oldRecord")
+    @GetMapping("/users/{userId}/{routeId}/oldRecord")
     public ResponseEntity<UserRecord> getOldRecord(@PathVariable("userId") Long userId, @PathVariable("routeId") Long routeId){
     	return userRecordService.getOldRecord(userId, routeId);
     }

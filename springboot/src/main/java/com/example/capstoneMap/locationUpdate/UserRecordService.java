@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.example.capstoneMap.ranking.RankingService;
 import com.example.capstoneMap.route.Route;
 import com.example.capstoneMap.route.RouteDto;
 import com.example.capstoneMap.route.RouteRepository;
@@ -23,6 +24,8 @@ public class UserRecordService {
 	private UserRepository userRepository;
 	@Autowired
 	private RouteRepository routeRepository;
+    @Autowired
+    private RankingService rankingService;
 	
     @Transactional
     public ResponseEntity<Route> saveRecord(UserRecordDto userRecordDto, Long userId, Long routeId) {
@@ -41,6 +44,9 @@ public class UserRecordService {
         System.out.println("entity: " + userRecord.toString());
         route.addUserRecord(userRecord);
         routeRepository.save(route);
+        
+        // 랭킹 업데이트
+        rankingService.updateRankings(userRecordDto.getRouteId());
         
         return ResponseEntity.ok(route);
     }

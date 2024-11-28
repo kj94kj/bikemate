@@ -9,7 +9,10 @@ import com.example.capstonemap.distance.DistancePolyLine;
 import com.example.capstonemap.distance.DistanceTwoLocation;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import lombok.Getter;
@@ -43,6 +46,7 @@ public class UserUpdateInfo {
 
     private int ranking;
 
+    //oldMyRecord: 나의 이전기록, oldOtherRecord: 경주하고 있는 기록
     private UserRecordDto myRecordDto = new UserRecordDto(userId, routeId);
     private UserRecordDto oldMyRecord;
     private UserRecordDto oldOtherRecord;
@@ -58,7 +62,7 @@ public class UserUpdateInfo {
 
     // 기록 유저의 n초마다의 위치를 set하기 위해 만듦
     public void setOldLocation(){
-        oldLocation=oldMyRecord.getLocationList().get(counter);
+        oldLocation=oldOtherRecord.getLocationList().get(counter);
         counter++;
     }
 
@@ -77,11 +81,34 @@ public class UserUpdateInfo {
         this.routeId = routeId;
     }
 
+    // 경주가 끝나고 내 예전 기록보다 내 현재 기록이 더 빠르면(작으면) 갱신하는 함수
     public void setUserRecordDto(){
+        // elapsedTime(밀리초)을 우리가 보는 시간으로 나타내는과정
+        LocalDateTime dateTime = Instant.ofEpochMilli(elapsedTime)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String curElapsedTime = dateTime.format(formatter);
+
+        LocalDateTime dateTime2 = Instant.ofEpochMilli(oldMyRecord.getElapsedTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String oldElapsedTime = dateTime2.format(formatter2);
+
+
+        // 이 메시지가 경주가 끝나면 출력되야함.
+        System.out.println("현재 기록은 "+curElapsedTime+" 입니다.");
+        System.out.println("이전 기록은 "+oldElapsedTime+" 입니다.");
+
             if(oldMyRecord.getElapsedTime() - elapsedTime > 0){
+                System.out.println("기록이 갱신 됩니다.");
                 myRecordDto.setLocationList(locationList);
                 myRecordDto.setElapsedTime(elapsedTime);
 
+                // 이거하면 자동으로 랭킹은 저장됨.
                 SaveMyRecord.saveMyRecord(myRecordDto, userId, routeId);
         }
     }
