@@ -1,5 +1,8 @@
 package com.example.capstonemap.polyLine;
 
+import static com.example.capstonemap.distance.DistancePolyLine.calculateTotalLength;
+
+import com.example.capstonemap.distance.DistancePolyLine;
 import com.example.capstonemap.routes.RouteDto;
 import com.example.capstonemap.routes.RouteRepository;
 import com.example.capstonemap.user.UserDto;
@@ -43,8 +46,11 @@ public class ClickPolyLine {
                 startLocation[0]=origin[0].latitude;
                 startLocation[1]=origin[0].longitude;
 
+                String encodedPath = PolyLine.getLastEncoded();
+                Double length =DistancePolyLine.calculateTotalLength(DistancePolyLine.encodedToLatLng(encodedPath));
+
                 // 현재 루트 이름은 temproal임 수정하기
-                routeDto[0] =new RouteDto("temporal", PolyLine.getLastEncoded(), locationList, startLocation);
+                routeDto[0] =new RouteDto("temporal", encodedPath, locationList, startLocation, length);
                 Gson gson=new Gson();
                 System.out.println(gson.toJson(routeDto[0]));
 

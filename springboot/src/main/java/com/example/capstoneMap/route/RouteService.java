@@ -50,7 +50,8 @@ public class RouteService {
     	List<Route> routes=routeRepository.findAll();   
     	
         List<RouteDto> routeDtos = routes.stream()
-                .map(route -> new RouteDto(route.getId(), route.getName(), route.getEncodedPath(), route.getLocationList(), route.getUserId(), route.getStartLocation()))
+                .map(route -> new RouteDto(route.getId(), route.getName(), route.getEncodedPath(), route.getLocationList(), route.getUserId(), route.getStartLocation(), 
+                		route.getLength()))
                 .collect(Collectors.toList());
     	
     	return ResponseEntity.ok(routeDtos);
@@ -65,7 +66,8 @@ public class RouteService {
     	
     	
         List<RouteDto> userRouteDtos = userRoutes.stream()
-                .map(route -> new RouteDto(route.getId(), route.getName(), route.getEncodedPath(), route.getLocationList(), route.getUserId(), route.getStartLocation()))
+                .map(route -> new RouteDto(route.getId(), route.getName(), route.getEncodedPath(), route.getLocationList(), route.getUserId(), 
+                		route.getStartLocation(), route.getLength()))
                 .collect(Collectors.toList());
     	
     	return ResponseEntity.ok(userRouteDtos);
@@ -86,4 +88,18 @@ public class RouteService {
     	
     	return ResponseEntity.ok("Route deleted successfully"); 
     }
+    
+    @Transactional
+    public ResponseEntity<List<RouteDto>> getLengthRoutes(Double minLength, Double maxLength){
+    	
+    	List<Route> lengthRoutes=routeRepository.findByLengthBetween(minLength, maxLength);
+    	
+    	
+        List<RouteDto> lengthRouteDtos = lengthRoutes.stream()
+                .map(route -> new RouteDto(route.getId(), route.getName(), route.getEncodedPath(), route.getLocationList(), route.getUserId(), 
+                		route.getStartLocation(), route.getLength()))
+                .collect(Collectors.toList());
+    	
+    	return ResponseEntity.ok(lengthRouteDtos);
+    	}
 }

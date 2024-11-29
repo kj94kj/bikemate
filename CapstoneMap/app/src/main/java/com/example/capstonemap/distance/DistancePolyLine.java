@@ -4,6 +4,7 @@ import static com.example.capstonemap.distance.DistanceTwoLocation.calculateDist
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
+import com.google.maps.android.SphericalUtil;
 
 import java.util.List;
 
@@ -47,5 +48,17 @@ public class DistancePolyLine {
     private static double calculateDistanceToSegment(LatLng point, LatLng segmentStart, LatLng segmentEnd) {
         // PolyUtil.distanceToLine 메서드 활용
         return PolyUtil.distanceToLine(point, segmentStart, segmentEnd);
+    }
+
+    public static double calculateTotalLength(List<LatLng> path) {
+        double totalLength = 0;
+
+        for (int i = 0; i < path.size() - 1; i++) {
+            LatLng point1 = path.get(i);
+            LatLng point2 = path.get(i + 1);
+            totalLength += SphericalUtil.computeDistanceBetween(point1, point2); // 두 점 간 거리 계산
+        }
+
+        return totalLength; // 총 거리 반환 (단위: 미터)
     }
 }

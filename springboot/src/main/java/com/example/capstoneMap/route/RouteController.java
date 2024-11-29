@@ -34,9 +34,16 @@ public class RouteController {
     public ResponseEntity<List<RouteDto>> getUserRoutes(@PathVariable("userId") Long userId){
     	return routeService.getUserRoutes(userId);
     }
+   
     
     @DeleteMapping("/users/{userId}/routes")
     public ResponseEntity<String> deleteRoutes(@PathVariable("userId") Long userId, @RequestParam("routeId") Long routeId){
     	return routeService.deleteRoute(userId, routeId);
+    }
+    
+    @GetMapping("/users/length/routes/{minLength}/{maxLength}")
+    public ResponseEntity<List<RouteDto>> getLengthRoutes(@PathVariable("minLength") Double minLength, 
+    		@PathVariable("maxLength") Double maxLength){
+    	return routeService.getLengthRoutes(minLength, maxLength);
     }
 }

@@ -29,29 +29,32 @@ public class RouteDto {
 	private Long userId;
 	private Double[] startLocation;
 	private List<UserRecordDto> userRecordDtos;
+	private Double length;
 	
 	
-	public RouteDto(Long id, String name, String encodedPath ,List<Double[]> locationList, Long userId, Double[] startLocation) {
+	public RouteDto(Long id, String name, String encodedPath ,List<Double[]> locationList, Long userId, Double[] startLocation, Double length) {
 		this.id = id;
 	    this.name = name;
 	    this.encodedPath = encodedPath;
 	    this.locationList = locationList; 
 	    this.startLocation = startLocation;
 	    this.userId = userId;
+	    this.length = length;
 	}
 	
-	public RouteDto(String name, String encodedPath ,List<Double[]> locationList, Long userId, Double[] startLocation, List<UserRecordDto> userRecordDtos) {
+	public RouteDto(String name, String encodedPath ,List<Double[]> locationList, Long userId, Double[] startLocation, List<UserRecordDto> userRecordDtos, Double length) {
 	    this.name = name;
 	    this.encodedPath = encodedPath;
 	    this.locationList = locationList; 
 	    this.userId=userId;
 	    this.startLocation=startLocation;
 	    this.userRecordDtos = userRecordDtos;
+	    this.length = length;
 	}
 	
 	public Route toEntity() {
 		if(userRecordDtos == null) {
-			return new Route(id, name, encodedPath, convertLocationListToJson(locationList), startLocation);
+			return new Route(id, name, encodedPath, convertLocationListToJson(locationList), startLocation, length);
 		}else {
 			List<UserRecord> userRecords=new ArrayList<>();
 			
@@ -59,7 +62,7 @@ public class RouteDto {
 				userRecords.add(i.toEntity());
 			}
 			
-			return new Route(id, name, encodedPath, convertLocationListToJson(locationList), startLocation, userRecords);
+			return new Route(id, name, encodedPath, convertLocationListToJson(locationList), startLocation, userRecords, length);
 		}
 	}
 	

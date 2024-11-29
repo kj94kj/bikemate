@@ -31,4 +31,7 @@ public interface RouteApiService {
     @DELETE("/api/users/{userId}/routes")
     Call<Void> deleteRoute( @Path("userId") Long userId, @Query("routeId") Long routeId);
 
+    @GET("/api/users/length/routes/{minLength}/{maxLength}")
+    Call<List<RouteDto>> getLengthRoutes(@Path("minLength") Double minLength, @Path("maxLength") Double maxLength);
 }
+    

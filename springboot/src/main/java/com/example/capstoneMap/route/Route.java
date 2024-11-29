@@ -38,14 +38,17 @@ public class Route {
 	
 	private Double[] startLocation;
 	
+	private Double length;
+	
 	
 	// 유저 아이디 안받는 버전
-	public Route(Long id, String name, String encodedPath, String locationListJson, Double[] startLocation) {
+	public Route(Long id, String name, String encodedPath, String locationListJson, Double[] startLocation, Double length) {
 		this.id=id;
 		this.name=name;
 		this.encodedPath=encodedPath;
 		this.locationListJson=locationListJson;
 		this.startLocation=startLocation;
+		this.length = length;
 	}
 	
     //mappedBy = 연관주인객체, CascadeType.ALL=이게 수정되면 다 수정됨, FetchType.LAZY= 필요할때만 호출됨
@@ -53,13 +56,14 @@ public class Route {
     @JoinColumn(name="routeId")
     private List<UserRecord> userRecords=new ArrayList<>();
     
-	public Route(Long id, String name, String encodedPath, String locationListJson, Double[] startLocation, List<UserRecord> userRecords) {
+	public Route(Long id, String name, String encodedPath, String locationListJson, Double[] startLocation, List<UserRecord> userRecords, Double length) {
 		this.id=id;
 		this.name=name;
 		this.encodedPath=encodedPath;
 		this.locationListJson=locationListJson;
 		this.startLocation=startLocation;
 		this.userRecords=userRecords;
+		this.length = length;
 	}
 	
     // 기록을 추가하면 Route 엔티티의 userRecords에도 추가가됨

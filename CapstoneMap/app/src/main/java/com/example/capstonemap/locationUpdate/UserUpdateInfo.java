@@ -44,7 +44,11 @@ public class UserUpdateInfo {
 
     private List<Double[]> locationList;
 
+    //내 기록 순위
     private int ranking;
+
+    //내 경주 순위(ranking과 다른 것 주의)
+    private int raceRanking;
 
     //oldMyRecord: 나의 이전기록, oldOtherRecord: 경주하고 있는 기록
     private UserRecordDto myRecordDto = new UserRecordDto(userId, routeId);
@@ -66,7 +70,8 @@ public class UserUpdateInfo {
         counter++;
     }
 
-    public int rankingNow(){
+    // 현재 내가 1등인지 2등인지 알려줌.
+    public int raceRankingNow(){
         double meDistance = DistancePolyLine.calculateProgress(DistanceTwoLocation.doubleToLatLng(currentLocation), polyline);
         double otherDistance = DistancePolyLine.calculateProgress(DistanceTwoLocation.doubleToLatLng(currentLocation), polyline);
 
