@@ -153,6 +153,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // 클릭 이벤트 설정
         ClickPolyLine.clickPolyLine(mMap, userDto);
 
+
         // 위치 업데이트 시작
         startLocationUpdates();
 
