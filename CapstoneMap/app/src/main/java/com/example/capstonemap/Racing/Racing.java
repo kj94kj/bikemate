@@ -1,10 +1,14 @@
 package com.example.capstonemap.Racing;
 
+import com.example.capstonemap.locationUpdate.GetOldRecord;
 import com.example.capstonemap.locationUpdate.GetTop5Record;
 import com.example.capstonemap.locationUpdate.UserRecordApiService;
 import com.example.capstonemap.locationUpdate.UserRecordDto;
 import com.example.capstonemap.locationUpdate.UserRecordRepository;
 import com.example.capstonemap.locationUpdate.UserUpdateInfo;
+import com.example.capstonemap.rival.GetRival;
+import com.example.capstonemap.rival.RivalDto;
+import com.example.capstonemap.routes.RouteDto;
 
 import java.util.List;
 
@@ -53,7 +57,18 @@ public class Racing {
     }
 
     // 라이벌하고 레이싱
-    public static int rivalRacing(UserUpdateInfo userUpdateInfo){
+    public static int rivalRacing(UserUpdateInfo userUpdateInfo, Long otherId){
+        RivalDto rivalDto=GetRival.getRival(userUpdateInfo.getUserId(), userUpdateInfo.getRouteId());
+
+        if(rivalDto.getOtherId().contains(otherId)){
+            UserRecordDto otherRecordDto = GetOldRecord.getOldRecord(otherId, userUpdateInfo.getRouteId());
+
+            userUpdateInfo.setOldOtherRecord(otherRecordDto);
+        }else{
+            System.out.println("rival이 없음");
+            return -1;
+        }
+
         return 3;
     }
 

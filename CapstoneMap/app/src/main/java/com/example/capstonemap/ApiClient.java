@@ -2,6 +2,7 @@ package com.example.capstonemap;
 
 import com.example.capstonemap.locationUpdate.UserRecordApiService;
 import com.example.capstonemap.ranking.RankingApiService;
+import com.example.capstonemap.rival.RivalApiService;
 import com.example.capstonemap.routes.RouteApiService;
 
 import retrofit2.Retrofit;
@@ -36,5 +37,9 @@ public class ApiClient {
     private static final RankingApiService rankingApiservice = ApiClient.getClient().create(RankingApiService.class);
 
     public static RankingApiService getRankingApiService(){return rankingApiservice;}
+
+    private static final RivalApiService rivalApiService = ApiClient.getClient().create(RivalApiService.class);
+
+    public static RivalApiService getRivalApiService(){return rivalApiService;}
 
 }
