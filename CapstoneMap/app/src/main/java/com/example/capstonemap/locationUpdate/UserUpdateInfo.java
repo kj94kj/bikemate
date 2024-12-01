@@ -96,17 +96,26 @@ public class UserUpdateInfo {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String curElapsedTime = dateTime.format(formatter);
 
-        LocalDateTime dateTime2 = Instant.ofEpochMilli(oldMyRecord.getElapsedTime())
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
+        if(oldMyRecord == null){
+            System.out.println("현재 기록은 "+curElapsedTime+" 입니다.");
+            System.out.println("기록이 저장 됩니다.");
+            myRecordDto.setLocationList(locationList);
+            myRecordDto.setElapsedTime(elapsedTime);
 
-        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String oldElapsedTime = dateTime2.format(formatter2);
+            // 이거하면 자동으로 랭킹은 저장됨.
+            SaveMyRecord.saveMyRecord(myRecordDto, userId, routeId);
+        }else{
+            LocalDateTime dateTime2 = Instant.ofEpochMilli(oldMyRecord.getElapsedTime())
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+
+            DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String oldElapsedTime = dateTime2.format(formatter2);
 
 
-        // 이 메시지가 경주가 끝나면 출력되야함.
-        System.out.println("현재 기록은 "+curElapsedTime+" 입니다.");
-        System.out.println("이전 기록은 "+oldElapsedTime+" 입니다.");
+            // 이 메시지가 경주가 끝나면 출력되야함.
+            System.out.println("현재 기록은 "+curElapsedTime+" 입니다.");
+            System.out.println("이전 기록은 "+oldElapsedTime+" 입니다.");
 
             if(oldMyRecord.getElapsedTime() - elapsedTime > 0){
                 System.out.println("기록이 갱신 됩니다.");
@@ -115,6 +124,7 @@ public class UserUpdateInfo {
 
                 // 이거하면 자동으로 랭킹은 저장됨.
                 SaveMyRecord.saveMyRecord(myRecordDto, userId, routeId);
+            }
         }
     }
 

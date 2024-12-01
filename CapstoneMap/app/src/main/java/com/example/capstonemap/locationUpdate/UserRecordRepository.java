@@ -76,4 +76,26 @@ public class UserRecordRepository {
             }
         });
     }
+
+    //Racing에서 씀
+    public void getTop5Record(Long userId, Long routeId, Consumer<List<UserRecordDto>> onSuccess, Runnable onError) {
+        ApiClient.getUserRecordApiService().getTop5Record(userId, routeId).enqueue(new Callback<List<UserRecordDto>>() {
+            @Override
+            public void onResponse(Call<List<UserRecordDto>> call, Response<List<UserRecordDto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    onSuccess.accept(response.body());
+                    System.out.println("유저 루트 조회 성공");
+                } else {
+                    onError.run();
+                    System.out.println("유저 루트 조회 실패, 응답 코드: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<UserRecordDto>> call, Throwable t) {
+                onError.run();
+                System.out.println("유저 루트 조회 실패, 오류: " + t.getMessage());
+            }
+        });
+    }
 }

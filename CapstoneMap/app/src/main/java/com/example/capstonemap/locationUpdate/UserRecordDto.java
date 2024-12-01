@@ -18,7 +18,7 @@ public class UserRecordDto {
     private Long id;
     private Long userId;
     private Long routeId;
-    private long elapsedTime;
+    private Long elapsedTime;
     private List<Double[]> locationList;
 
     public UserRecordDto(Long userId, Long routeId){

@@ -31,6 +31,7 @@ public class CurrentMapBound {
     }
 
     // 나중에 모든 루트 받고 -> 그걸 allRoutes에 넣고 -> 콜백함수 정의해야함
+    // 호출간격 문제는 나중에 해결하기
     public static void cameraBoundListener(GoogleMap googleMap, List<RouteDto> allRoutes,
                                            OnBoundListener listener) {
 

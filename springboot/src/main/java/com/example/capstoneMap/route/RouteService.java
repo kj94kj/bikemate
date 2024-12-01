@@ -26,7 +26,7 @@ public class RouteService {
 	
 	//폴리라인 그린걸 저장하는 함수, 유저가 Id를 통해 저장할 수 있음.
     @Transactional
-    public ResponseEntity<User> saveRoute(RouteDto routeDto, Long userId) {
+    public ResponseEntity<UserDto> saveRoute(RouteDto routeDto, Long userId) {
     	User user=userRepository.findById(userId)
     			.orElseThrow(() -> new IllegalArgumentException("User not found"));
     	
@@ -41,7 +41,15 @@ public class RouteService {
         user.addRoute(route);
         userRepository.save(user);
         
-        return ResponseEntity.ok(user);
+        List<Route> userRoutes = user.getRoutes();
+        List<RouteDto> userRoutesDtos = userRoutes.stream()
+                .map(userRoute -> new RouteDto(userRoute.getId(), userRoute.getName(), userRoute.getEncodedPath(), 
+                		userRoute.getLocationList(), userRoute.getUserId(), userRoute.getStartLocation(), userRoute.getLength()))
+                .collect(Collectors.toList());
+        
+        UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword(), userRoutesDtos);
+        
+        return ResponseEntity.ok(userDto);
     }
     
     // 모든 루트를 조회하는 함수

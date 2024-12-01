@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.capstoneMap.user.User;
+import com.example.capstoneMap.user.UserDto;
 import com.example.capstoneMap.user.UserService;
 
 @RestController
@@ -21,7 +22,7 @@ public class RouteController {
 	//현재 saveRoute가 Route 객체를 반환하기로 되어있는데 컨트롤러에서 사용할일 있으면 사용하기
 	//PathVariable {}안에 값을 받아옴, RequestParam 내가 {} 값을 전달
     @PostMapping("/users/{userId}/routes")
-    public ResponseEntity<User> saveRoute(@RequestBody RouteDto routeDto, @PathVariable("userId") Long userId) {
+    public ResponseEntity<UserDto> saveRoute(@RequestBody RouteDto routeDto, @PathVariable("userId") Long userId) {
         return routeService.saveRoute(routeDto, userId);
     }
     
