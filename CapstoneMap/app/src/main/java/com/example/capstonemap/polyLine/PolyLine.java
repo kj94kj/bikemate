@@ -1,177 +1,192 @@
-    package com.example.capstonemap.polyLine;
+package com.example.capstonemap.polyLine;
 
+import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 
-    import java.util.ArrayList;
-    import java.util.List;
-    import java.util.concurrent.Executors;
-    import java.util.HashMap;
+import com.example.capstonemap.BuildConfig;
+import com.example.capstonemap.MakeApiRequest.MakeApiRequest;
+import com.example.capstonemap.MapsActivity;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 
-    import android.graphics.Color;
-    import android.os.Handler;
-    import android.os.Looper;
-    import android.util.Log;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-    import com.example.capstonemap.MakeApiRequest.MakeApiRequest;
-    import com.example.capstonemap.BuildConfig;
-    import com.example.capstonemap.MapsActivity;
-    import com.example.capstonemap.routes.RouteRepository;
-    import com.google.android.gms.maps.model.LatLng;
-    import com.google.android.gms.maps.model.Polyline;
-    import com.google.android.gms.maps.model.PolylineOptions;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Executors;
 
-    import org.json.JSONArray;
-    import org.json.JSONObject;
+public class PolyLine {
 
-    // 폴리라인을 길에 맞춰 그리는 함수 구현
+    private static final HashMap<String, Polyline> polylineMap = new HashMap<>();
+    private static String lastEncoded;
 
-    //폴리라인은 encodedString을 가져와 List<LatLng>으로 만든다음 그점들을 이어 그리는 것이다.
-    public class PolyLine {
-        RouteRepository routeRepository=new RouteRepository();
+    // Directions API 호출
+    public static void getDirections(LatLng origin, LatLng destination, OnEncodedPathReadyCallback callback) {
+        String apiKey = BuildConfig.MAPS_API_KEY;
+        String urlString = "https://maps.googleapis.com/maps/api/directions/json?origin="
+                + origin.latitude + "," + origin.longitude
+                + "&destination=" + destination.latitude + "," + destination.longitude
+                + "&mode=transit&key=" + apiKey;
 
-        //폴리라인의 정보를 담는 해시맵
-        private static final HashMap<String, Polyline> polylineMap = new HashMap<>();
-        private static String lastEncoded;
-
-        // url에 응답을 요청하는 함수
-        public static void getDirections(LatLng origin, LatLng destination) {
-            String apiKey = BuildConfig.MAPS_API_KEY;
-            String urlString = "https://maps.googleapis.com/maps/api/directions/json?origin=" + origin.latitude + "," + origin.longitude +
-                    "&destination=" + destination.latitude + "," + destination.longitude +"&key=" + apiKey;
-
-            Log.d("DIRECTIONS_API_REQUEST", "Request URL: " + urlString);
-
-            Executors.newSingleThreadExecutor().execute(() -> {
-                String response = MakeApiRequest.makeApiRequest(urlString);
-                if (response != null) {
-                    Log.d("DIRECTIONS_API_RESPONSE", response);
-                    new Handler(Looper.getMainLooper()).post(() -> drawPolyline(response));
-                }else{
-                    Log.e("DIRECTIONS_API", "No response from the API");
+        Executors.newSingleThreadExecutor().execute(() -> {
+            String response = MakeApiRequest.makeApiRequest(urlString);
+            if (response == null) {
+                Log.e("DIRECTIONS_API", "No response from API");
+                if (callback != null) {
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onPathReady(null));
                 }
-            });
-        }
+                return;
+            }
 
-        // 거리, 폴리라인 그리기, 시작점 등등의 정보를 확인가능하다
-        private static void drawPolyline(String response) {
             try {
                 JSONObject jsonObject = new JSONObject(response);
-                JSONArray routes = jsonObject.getJSONArray("routes");
-                List<LatLng> path = new ArrayList<>();
-
-                //로그 추가 zero_results 반환때문에
-                String status = jsonObject.getString("status");
-                Log.d("DIRECTIONS_API_STATUS", "API Response Status: " + status);
+                String status = jsonObject.optString("status", "UNKNOWN");
+                Log.d("DIRECTIONS_API_STATUS", "Status: " + status);
 
                 if (!"OK".equals(status)) {
-                    Log.e("DIRECTIONS_API_STATUS", "Error: API response status is " + status);
-                    if ("ZERO_RESULTS".equals(status)) {
-                        Log.e("DIRECTIONS_API", "No routes found between the specified origin and destination.");
+                    Log.e("DIRECTIONS_API_ERROR", "Status not OK: " + status);
+                    if (callback != null) {
+                        new Handler(Looper.getMainLooper()).post(() -> callback.onPathReady(null));
                     }
                     return;
                 }
 
-                //경로 데이터를 파싱함
-
-                if (routes.length() > 0) {
-                    JSONObject route = routes.getJSONObject(0);
-                    JSONArray legs = route.getJSONArray("legs");
-
-                    // 여기서 거리, 폴리라인 그리기, 시작점 등등의 정보를 확인가능하다
-
-                    if (legs.length() > 0) {
-                        JSONObject leg = legs.getJSONObject(0);
-
-                        JSONObject startLocation = leg.getJSONObject("start_location");
-                        LatLng startPoint = new LatLng(startLocation.getDouble("lat"), startLocation.getDouble("lng"));
-                        Log.d("ROUTE_INFO", "Start Point: " + startPoint);
-
-                        JSONObject endLocation = leg.getJSONObject("end_location");
-                        LatLng endPoint = new LatLng(endLocation.getDouble("lat"), endLocation.getDouble("lng"));
-                        Log.d("ROUTE_INFO", "End Point: " + endPoint);
-
-                        JSONObject distance = leg.getJSONObject("distance");
-                        String distanceText = distance.getString("text"); // 사람이 읽기 쉬운 거리
-                        int distanceValue = distance.getInt("value"); // 거리 값 (미터 단위)
-                        Log.d("ROUTE_INFO", "Distance: " + distanceText + " (" + distanceValue + " meters)");
-
-                        JSONObject duration = leg.getJSONObject("duration");
-                        String durationText = duration.getString("text"); // 사람이 읽기 쉬운 소요 시간
-                        int durationValue = duration.getInt("value"); // 소요 시간 값 (초 단위)
-                        Log.d("ROUTE_INFO", "Duration: " + durationText + " (" + durationValue + " seconds)");
-
-                        // Polyline 경로 그리기
-                        JSONArray steps = leg.getJSONArray("steps");
-                        for (int j = 0; j < steps.length(); j++) {
-                            String polyline = steps.getJSONObject(j).getJSONObject("polyline").getString("points");
-                            path.addAll(decodePolyline(polyline));
-                        }
+                JSONArray routes = jsonObject.optJSONArray("routes");
+                if (routes == null || routes.length() == 0) {
+                    Log.e("DIRECTIONS_API_ERROR", "No routes found in the response.");
+                    if (callback != null) {
+                        new Handler(Looper.getMainLooper()).post(() -> callback.onPathReady(null));
                     }
+                    return;
                 }
 
-                // polyline과 encoded는 폴리라인의 정보를 저장하기 위함임
-                // 여기서 옵션을 건드리면 색깔과 굵기를 바꿀 수 있음
-                PolylineOptions polylineOptions = new PolylineOptions().addAll(path).color(Color.BLUE).width(5);
-                Polyline polyline=MapsActivity.getMap().addPolyline(polylineOptions);
-                String encodedPath = jsonObject.getJSONArray("routes").getJSONObject(0)
-                        .getJSONObject("overview_polyline").getString("points");
-                lastEncoded=encodedPath;
+                JSONObject route = routes.getJSONObject(0);
+                JSONObject overviewPolyline = route.optJSONObject("overview_polyline");
+                String encodedPolyline = overviewPolyline != null ? overviewPolyline.optString("points") : null;
 
-                polylineMap.put(encodedPath, polyline);
-
+                if (encodedPolyline == null || encodedPolyline.isEmpty()) {
+                    Log.e("DIRECTIONS_API_ERROR", "Encoded polyline is null or empty.");
+                    if (callback != null) {
+                        new Handler(Looper.getMainLooper()).post(() -> callback.onPathReady(null));
+                    }
+                } else {
+                    Log.d("ENCODED_POLYLINE", "Encoded polyline: " + encodedPolyline);
+                    lastEncoded = encodedPolyline;
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onPathReady(encodedPolyline));
+                }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("DIRECTIONS_API_ERROR", "Error parsing response", e);
+                if (callback != null) {
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onPathReady(null));
+                }
             }
+        });
+    }
+
+    // 지도에 폴리라인 그리기
+    public static void drawPolylineOnMap(List<LatLng> path) {
+        if (path == null || path.isEmpty()) {
+            Log.e("DRAW_POLYLINE", "Path is null or empty, skipping drawing.");
+            return;
         }
 
-        //인코딩된 String 폴리라인을 latlng로 변환
-        private static List<LatLng> decodePolyline(String encoded) {
-            List<LatLng> poly = new ArrayList<>();
-            int index = 0, len = encoded.length();
-            int lat = 0, lng = 0;
+        PolylineOptions polylineOptions = new PolylineOptions().addAll(path).color(Color.BLUE).width(5);
+        Polyline polyline = MapsActivity.getMap().addPolyline(polylineOptions);
 
-            while (index < len) {
-                int b, shift = 0, result = 0;
-                do {
-                    b = encoded.charAt(index++) - 63;
-                    result |= (b & 0x1f) << shift;
-                    shift += 5;
-                } while (b >= 0x20);
-                int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-                lat += dlat;
+        // Save the polyline for removal
+        String encodedPath = encodePolyline(path);
+        polylineMap.put(encodedPath, polyline);
+    }
 
-                shift = 0;
-                result = 0;
-                do {
-                    b = encoded.charAt(index++) - 63;
-                    result |= (b & 0x1f) << shift;
-                    shift += 5;
-                } while (b >= 0x20);
-                int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-                lng += dlng;
-
-                LatLng p = new LatLng((lat / 1E5), (lng / 1E5));
-                poly.add(p);
-            }
-
+    // 폴리라인 디코딩
+    public static List<LatLng> decodePolyline(String encoded) {
+        List<LatLng> poly = new ArrayList<>();
+        if (encoded == null || encoded.isEmpty()) {
+            Log.e("DECODE_POLYLINE", "Encoded polyline is null or empty.");
             return poly;
         }
 
-        // 해시맵에서는 제거 안하게만듦
-        // 특정 encoded 경로를 기반으로 지도에서만 폴리라인 삭제
-        public static void removePolyline(String encodedPath) {
-            // 저장된 Polyline 객체를 가져와 지도에서 제거
-            Polyline polyline = polylineMap.get(encodedPath);
-            if (polyline != null) {
-                polyline.remove();  // 지도에서 폴리라a인 제거
-                Log.d("REMOVE_POLYLINE", "Polyline removed for path: " + encodedPath);
-            } else {
-                Log.e("REMOVE_POLYLINE", "No Polyline found for path: " + encodedPath);
-            }
+        int index = 0, len = encoded.length();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            LatLng point = new LatLng((lat / 1E5), (lng / 1E5));
+            poly.add(point);
         }
 
-        public static String getLastEncoded(){
-            return lastEncoded;
-        }
-
+        return poly;
     }
+
+    // Encoded path 저장
+    public static String getLastEncoded() {
+        return lastEncoded;
+    }
+
+    // 폴리라인 제거
+    public static void removePolyline(String encodedPath) {
+        Polyline polyline = polylineMap.get(encodedPath);
+        if (polyline != null) {
+            polyline.remove();
+            polylineMap.remove(encodedPath);
+            Log.d("REMOVE_POLYLINE", "Polyline removed for path: " + encodedPath);
+        } else {
+            Log.e("REMOVE_POLYLINE", "No Polyline found for path: " + encodedPath);
+        }
+    }
+
+    private static String encodePolyline(List<LatLng> path) {
+        StringBuilder encoded = new StringBuilder();
+        long lastLat = 0, lastLng = 0;
+
+        for (LatLng point : path) {
+            long lat = Math.round(point.latitude * 1E5);
+            long lng = Math.round(point.longitude * 1E5);
+
+            long dLat = lat - lastLat;
+            long dLng = lng - lastLng;
+
+            encode(dLat, encoded);
+            encode(dLng, encoded);
+
+            lastLat = lat;
+            lastLng = lng;
+        }
+
+        return encoded.toString();
+    }
+
+    private static void encode(long value, StringBuilder encoded) {
+        value = value < 0 ? ~(value << 1) : (value << 1);
+        while (value >= 0x20) {
+            encoded.append((char) ((0x20 | (value & 0x1f)) + 63));
+            value >>= 5;
+        }
+        encoded.append((char) (value + 63));
+    }
+}
 

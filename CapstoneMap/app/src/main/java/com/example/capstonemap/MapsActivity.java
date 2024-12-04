@@ -145,11 +145,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng location = new LatLng(37.506632, 126.960733);
         mMap.addMarker(new MarkerOptions().position(location).title("Jung-dae Hospital"));
 
-        // PolyLine 호출 - GoogleMap 초기화 이후 실행
-        LatLng origin = new LatLng(35.657267698447065, 139.75021273761237);
-        LatLng destination = new LatLng(35.65130445276861, 139.77898822344184);
-        PolyLine.getDirections(origin, destination);
-
         // 클릭 이벤트 설정
         ClickPolyLine.clickPolyLine(mMap, userDto);
 

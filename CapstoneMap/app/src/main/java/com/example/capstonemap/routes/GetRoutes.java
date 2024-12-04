@@ -1,10 +1,12 @@
 package com.example.capstonemap.routes;
 
+import android.util.Log;
 import android.view.View;
 
 import com.example.capstonemap.databinding.ActivityMapsBinding;
 import com.example.capstonemap.polyLine.PolyLine;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.PolyUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +51,19 @@ public class GetRoutes {
                 latlngs[i] = new LatLng(location[0], location[1]);
             }
 
-            PolyLine.getDirections(latlngs[0], latlngs[1]);
+            PolyLine.getDirections(latlngs[0], latlngs[1], encodedPath -> {
+                if (encodedPath == null || encodedPath.isEmpty()) {
+                    Log.e("ENCODED_PATH_ERROR", "Encoded path is null or empty.");
+                    return;
+                }
+
+                // 여기에서 필요한 작업 수행
+                // 예를 들어, encodedPath를 사용해 경로를 디코딩하거나 저장
+                List<LatLng> decodedPath = PolyUtil.decode(encodedPath);
+                Log.d("DECODED_PATH", "Decoded path: " + decodedPath);
+
+                // 만약 추가적인 작업이 있다면 여기에서 수행
+            });
         }
     }
 

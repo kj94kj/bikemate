@@ -2,10 +2,13 @@ package com.example.capstonemap.distance;
 
 import static com.example.capstonemap.distance.DistanceTwoLocation.calculateDistance;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.android.SphericalUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DistancePolyLine {
@@ -15,7 +18,16 @@ public class DistancePolyLine {
     // user 패키지의 GetUserRoutes 클래스의 selectRoute함수를 써서 List<LatLng>으로 저장하자
 
     public static List<LatLng> encodedToLatLng(String encodedString){
-        return PolyUtil.decode(encodedString);
+        if (encodedString == null) {
+            Log.e("ENCODED_TO_LATLNG", "encodedString is null!");
+            return new ArrayList<>(); // 비어 있는 리스트 반환
+        }
+        try {
+            return PolyUtil.decode(encodedString);
+        } catch (Exception e) {
+            Log.e("ENCODED_TO_LATLNG_ERROR", "Error decoding encodedString", e);
+            return new ArrayList<>();
+        }
     }
 
     public static double calculateProgress(LatLng currentLocation, List<LatLng> polyline) {
