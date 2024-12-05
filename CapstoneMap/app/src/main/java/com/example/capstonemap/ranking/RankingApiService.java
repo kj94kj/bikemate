@@ -14,4 +14,7 @@ public interface RankingApiService {
 
     @GET("/api/{routeId}/rankings")
     Call<List<RankingDto>> getRankings(@Path("routeId") Long routeId);
+
+    @GET("/api/{userId}/{routeId}/rankings")
+    Call<RankingDto> getMyRanking(@Path("userId") Long userId, @Path("routeId") Long routeId);
 }

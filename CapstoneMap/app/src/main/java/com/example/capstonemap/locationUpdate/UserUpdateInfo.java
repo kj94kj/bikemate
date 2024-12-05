@@ -5,14 +5,23 @@ package com.example.capstonemap.locationUpdate;
 // UserUpdateDto에 루트가 끝나면 갱신하거나 OldUserRecord를 가져오는 클래스
 // 아마 userId와 routeId를 밖에서 받을 수 있을 것 같다.
 
+import android.content.Context;
+import android.os.Handler;
+import android.os.Vibrator;
+
+import com.example.capstonemap.AppContext;
+import com.example.capstonemap.R;
 import com.example.capstonemap.distance.DistancePolyLine;
 import com.example.capstonemap.distance.DistanceTwoLocation;
 import com.google.android.gms.maps.model.LatLng;
+
+import android.media.SoundPool;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
@@ -42,13 +51,13 @@ public class UserUpdateInfo {
     // 고스트와 나와의 거리
     private double distance;
 
-    private List<Double[]> locationList;
+    private List<Double[]> locationList = new ArrayList<>();
 
     //내 기록 순위
     private int ranking;
 
     //내 경주 순위(ranking과 다른 것 주의)
-    private int raceRanking;
+    private int raceRanking=0;
 
     //oldMyRecord: 나의 이전기록, oldOtherRecord: 경주하고 있는 기록
     private UserRecordDto myRecordDto = new UserRecordDto(userId, routeId);
@@ -66,19 +75,44 @@ public class UserUpdateInfo {
 
     // 기록 유저의 n초마다의 위치를 set하기 위해 만듦
     public void setOldLocation(){
-        oldLocation=oldOtherRecord.getLocationList().get(counter);
+        if(counter < oldOtherRecord.getLocationList().size() )
+            oldLocation=oldOtherRecord.getLocationList().get(counter);
         counter++;
     }
 
     // 현재 내가 1등인지 2등인지 알려줌.
     public int raceRankingNow(){
         double meDistance = DistancePolyLine.calculateProgress(DistanceTwoLocation.doubleToLatLng(currentLocation), polyline);
-        double otherDistance = DistancePolyLine.calculateProgress(DistanceTwoLocation.doubleToLatLng(currentLocation), polyline);
+        double otherDistance = DistancePolyLine.calculateProgress(DistanceTwoLocation.doubleToLatLng(oldLocation), polyline);
+
+        int rankingNow;
 
         if(meDistance - otherDistance > 0)
-            return 1;
+            rankingNow=1;
         else
-            return 2;
+            rankingNow=2;
+
+        if(raceRanking!=0 && raceRanking !=rankingNow){
+            raceRanking=rankingNow;
+            raceAlarm(raceRanking);
+        }
+
+        return rankingNow;
+    }
+
+    public void raceAlarm(int raceRanking){
+        Context context = AppContext.getAppContext();
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        SoundPool soundPool = new SoundPool.Builder().setMaxStreams(2).build();
+        int soundOne = soundPool.load(context, R.raw.short_beep, 1);
+        if(raceRanking == 1){
+            vibrator.vibrate(200);
+            soundPool.play(soundOne, 1, 1, 0, 0, 1);
+        }else if(raceRanking == 2){
+            vibrator.vibrate(new long[]{0, 200, 150, 200}, -1); // 패턴: [시작 지연, 진동, 쉬는 시간, 진동]
+            soundPool.play(soundOne, 1, 1, 0, 0, 1);
+            new Handler().postDelayed(() -> soundPool.play(soundOne, 1, 1, 0, 0, 1), 150);
+        }
     }
 
     public UserUpdateInfo(Long userId, Long routeId){

@@ -115,6 +115,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             userUpdateInfo=null;
                         }
                     }
+
+                    // 현재 순위 1위인지 2위인지 알려줌, 고스트 유저 위치를 set함. 화면에 보여주는 컴포넌트도 필요함.
+                    if(isRacing){
+                        userUpdateInfo.setOldLocation();
+                        int nowRanking= userUpdateInfo.raceRankingNow();
+                        System.out.println(nowRanking);
+                    }
                 }
             }
         };

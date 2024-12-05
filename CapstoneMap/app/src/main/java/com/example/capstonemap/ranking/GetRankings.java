@@ -13,6 +13,7 @@ import java.util.List;
 public class GetRankings {
     static RankingRepository rankingRepository=new RankingRepository();
     static List<RankingDto> rankingDtoList= new ArrayList<>();
+    static RankingDto myRankingDto = new RankingDto();
 
     private static List<RankingDto> getRankings(Long routeId) {
         rankingRepository.getRankings(
@@ -29,4 +30,22 @@ public class GetRankings {
 
         return rankingDtoList;
     }
+
+    private static RankingDto getMyRanking(Long userId, Long routeId) {
+        rankingRepository.getMyRanking( userId, routeId,
+                // 성공 시 routeDtoList에 데이터 저장
+                ranking-> {
+                    myRankingDto = ranking;
+                    System.out.println("랭킹이 있습니다.");
+                },
+                // 실패 시 처리
+                () -> {
+                    myRankingDto=null;
+                    System.out.println("랭킹이 없습니다.");
+                }
+        );
+
+        return myRankingDto;
+    }
+
 }
