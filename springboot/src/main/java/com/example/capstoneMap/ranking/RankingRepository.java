@@ -10,4 +10,5 @@ public interface RankingRepository extends JpaRepository<Ranking, Long> {
 	void deleteByRouteId(Long routeId);
 	
     List<Ranking> findByRouteId(Long routeId);
+    Ranking findByUserIdAndRouteId(Long userId, Long routeId);
 }

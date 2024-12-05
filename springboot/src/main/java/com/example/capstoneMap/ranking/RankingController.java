@@ -25,4 +25,9 @@ public class RankingController {
     public ResponseEntity<List<RankingDto>> getRankings(@PathVariable("routeId") Long routeId){
     	return rankingService.getRankings(routeId);
     }
+    
+    @GetMapping("/{userId}/{routeId}/rankings")
+    public ResponseEntity<RankingDto> getMyRanking(@PathVariable("userId") Long userId, @PathVariable("routeId") Long routeId){
+    	return rankingService.getMyRanking(userId, routeId);
+    }
 }

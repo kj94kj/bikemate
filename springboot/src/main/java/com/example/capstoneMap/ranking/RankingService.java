@@ -57,4 +57,13 @@ public class RankingService {
 
 	}
 
+	public ResponseEntity<RankingDto> getMyRanking(Long userId, Long routeId) {
+		
+		Ranking ranking = rankingRepository.findByUserIdAndRouteId(userId, routeId);
+		RankingDto rankingDto = new RankingDto(ranking.getId(), ranking.getUserId(), ranking.getRouteId(),ranking.getElapsedTime(),
+        		ranking.getRank());
+		
+		return ResponseEntity.ok(rankingDto);
+	}
+
 }
