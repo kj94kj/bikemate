@@ -73,4 +73,5 @@ dependencies {
     implementation libs.android.maps.utils
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    implementation 'com.google.android.material:material:1.12.0'
 }

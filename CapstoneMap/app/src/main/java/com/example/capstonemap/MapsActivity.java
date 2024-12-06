@@ -4,9 +4,11 @@ import static com.example.capstonemap.locationUpdate.LocationUpdateTime.location
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -15,15 +17,23 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.capstonemap.currentMapBound.CurrentMapBound;
+import com.example.capstonemap.currentMapBound.OnBoundListener;
+import com.example.capstonemap.currentMapBound.SearchLocation;
+import com.example.capstonemap.distance.DistanceTwoLocation;
 import com.example.capstonemap.locationUpdate.GetOldRecord;
 import com.example.capstonemap.polyLine.ClickPolyLine;
 import com.example.capstonemap.polyLine.PolyLine;
 import com.example.capstonemap.databinding.ActivityMapsBinding;
 import com.example.capstonemap.locationUpdate.UserUpdateInfo;
 import com.example.capstonemap.routes.DeleteRoute;
+import com.example.capstonemap.routes.FilterDialog;
 import com.example.capstonemap.routes.GetRoutes;
+import com.example.capstonemap.routes.RouteDto;
 import com.example.capstonemap.user.GetUserRoutes;
 import com.example.capstonemap.user.UserDto;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -31,17 +41,22 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import lombok.Getter;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+// 폴리라인 그리기가 적절히 들어간건아님.
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, OnBoundListener {
 
     private static final double MOCK_SPEED_M_S = 4.167; // 시속 15km/h를 m/s로 변환
     private static final String MOCK_PROVIDER = "mockProvider";
@@ -52,6 +67,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private Marker oldLocationMarker = null;
+    private SearchLocation searchLocation;
+
+    // 모든 루트를 저장하는 dto
+    private List<RouteDto> allRouteDtoList = new ArrayList<>();
+
+    // 현재 맵 범위에 있는 루트를 받는 dto
+    private List<RouteDto> boundRouteDtoList = new ArrayList<>();
+
+    // 지정한 길이의 모든 routeDtoList를 받는 dto
+    private List<RouteDto> allLengthRouteDtoList = new ArrayList<>();
 
     // 루트에 있을 때만 UserUpdateInfo에 좌표값, 속도값을 넣으려고함.
     // RouteInOut과 연관된 변수.
@@ -74,6 +100,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // 모든 루트 담음.
+        allRouteDtoList = new ArrayList<>();
+        allRouteDtoList = GetRoutes.getAllRoutes();
 
         // FusedLocationProviderClient 및 LocationRequest 설정
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -118,8 +148,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     // 현재 순위 1위인지 2위인지 알려줌, 고스트 유저 위치를 set함. 화면에 보여주는 컴포넌트도 필요함.
                     if(isRacing){
+
                         userUpdateInfo.setOldLocation();
                         int nowRanking= userUpdateInfo.raceRankingNow();
+                        Double[] oldLocation = (userUpdateInfo.getOldLocation());
+                        LatLng oldLatLng = DistanceTwoLocation.doubleToLatLng(oldLocation);
+
+                        if (oldLocationMarker != null) {
+                            oldLocationMarker.remove();
+                        }
+
+                        oldLocationMarker=mMap.addMarker(new MarkerOptions().position(oldLatLng));
                         System.out.println(nowRanking);
                     }
                 }
@@ -136,6 +175,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapFragment.getMapAsync(this);
         }
 
+        // 버튼 눌러서 minLength maxLength받고 그 범위안에 있는걸 routeDto에 담아서 보여주던가함.
+        findViewById(R.id.filter_button).setOnClickListener(v -> {
+            FilterDialog.showSeekBarDialog(this, (minLength, maxLength) -> {
+                applyFilter(minLength, maxLength);
+            });
+        });
+
+        // 검색창관련
+        searchLocation = new SearchLocation(this);
+        setupSearchListener();
+
+        Button buttonRouteManagement = findViewById(R.id.button_route_management);
+        buttonRouteManagement.setOnClickListener(v -> {
+            Intent intent = new Intent(MapsActivity.this, RouteManagementActivity.class);
+            startActivity(intent);
+        });
+
+        // UI 요소
+        Button toggleButton = findViewById(R.id.toggle_button); // XML에서 정의된 버튼
+        View filterButton = findViewById(R.id.filter_button); // visibility를 토글할 버튼
+
+        // 가시성 토글 이벤트 설정
+        toggleButton.setOnClickListener(v -> {
+            if (filterButton.getVisibility() == View.VISIBLE) {
+                filterButton.setVisibility(View.GONE);
+            } else {
+                filterButton.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override
@@ -147,6 +215,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //임시적인 유저생성 지워야함.
         UserDto userDto=new UserDto(1L, "a", "a");
+
+        if(allLengthRouteDtoList != null && !allLengthRouteDtoList.isEmpty()){
+            CurrentMapBound.cameraBoundListener(mMap, allLengthRouteDtoList, this);
+        }else if(allRouteDtoList != null && !allRouteDtoList.isEmpty()){
+            CurrentMapBound.cameraBoundListener(mMap, allRouteDtoList, this);
+        }
+
 
         // 지도에 기본 마커 추가
         LatLng location = new LatLng(37.506632, 126.960733);
@@ -168,6 +243,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         DeleteRoute.deleteButton(binding,1L, 1L);
 
+        // 버튼의 visibility 설정
+        // binding.GetAllRoutesButton.setVisibility(View.GONE);
     }
 
     private void enableMyLocation() {
@@ -322,4 +399,49 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         userUpdateInfo.setUserRecordDto();
     }
 
+
+    // 이걸 코스아이템에 담아야함. boundRouteDtoList -> 현재 맵 화면 안에 시작점이 있는 루트들을 가져옴.
+    @Override
+    public void onBound(List<RouteDto> boundRouteDtoList) {
+        this.boundRouteDtoList.clear();
+        this.boundRouteDtoList.addAll(boundRouteDtoList);
+    }
+
+    // 검색창관련
+    private void setupSearchListener() {
+        SearchView searchView = findViewById(R.id.search_location);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                LatLng latLng = searchLocation.getCoordinates(query);
+
+                if (latLng != null) {
+                    // 지도 이동
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+
+                    // 마커 추가
+                    mMap.addMarker(new MarkerOptions().position(latLng).title(query));
+
+                    Toast.makeText(MapsActivity.this, "Moved to " + query, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MapsActivity.this, "Location not found", Toast.LENGTH_SHORT).show();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+    }
+
+    // minLength, maxLength를 받고, 그 루트 길이 안에 있는 모든 루트를 가져옴.
+    private void applyFilter(double minLength, double maxLength) {
+        // 전체 루트를 거리 조건으로 필터링
+        allLengthRouteDtoList  = GetRoutes.getLengthRoutes(minLength, maxLength);
+
+        PolyLine.removeAllPolylines();
+    }
 }

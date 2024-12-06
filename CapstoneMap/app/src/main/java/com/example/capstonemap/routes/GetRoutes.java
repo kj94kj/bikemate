@@ -18,8 +18,8 @@ public class GetRoutes {
 
     // 이름은 getAllRoutes지만 사실 routeDtoList 필드에 저장하는(set) 역할도 함.
     // 루트를 다 가져오지말고 몇km 반경이내로만 가져오게 하는게 나을수도있음.
-    // 현재 drawAllRoutes로 다 루트를 그리게 만들어놓음
-    private static List<RouteDto> getAllRoutes() {
+    // 현재 drawAllRoutes는 뺌.
+    public static List<RouteDto> getAllRoutes() {
         routeRepository.getAllRoutes(
                 // 성공 시 routeDtoList에 데이터 저장
                 routes -> {
@@ -27,7 +27,6 @@ public class GetRoutes {
                     routeDtoList.addAll(routes);
                     System.out.println("모든 루트가 routeDtoList에 저장되었습니다.");
 
-                    drawAllRoutes(routeDtoList);
                 },
                 // 실패 시 처리
                 () -> {
@@ -88,7 +87,7 @@ public class GetRoutes {
     }
 
     // 현재 minLength와 maxLength를 받아 그 범위안에있는 루트를 가져오게함
-    private static List<RouteDto> getLengthRoutes(Double minLength, Double maxLength) {
+    public static List<RouteDto> getLengthRoutes(Double minLength, Double maxLength) {
         routeRepository.getLengthRoutes(
                 minLength, maxLength,
                 // 성공 시 routeDtoList에 데이터 저장

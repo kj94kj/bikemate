@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class ClickPolyLine {
     static RouteRepository routeRepository=new RouteRepository();
 
-    public static void clickPolyLine(GoogleMap mMap, UserDto userDto) {
+    public static RouteDto clickPolyLine(GoogleMap mMap) {
         final LatLng[] origin = new LatLng[1];  // 출발지를 저장할 배열
         final LatLng[] destination = new LatLng[1];  // 도착지를 저장할 배열
         final RouteDto[] routeDto = new RouteDto[1];
@@ -60,7 +60,7 @@ public class ClickPolyLine {
                     Gson gson = new Gson();
                     System.out.println(gson.toJson(routeDto[0]));
 
-                    saveRoute(routeDto, userDto);
+                    // saveRoute(routeDto, userDto);
                 });
 
             } else {
@@ -71,6 +71,8 @@ public class ClickPolyLine {
                 destination[0] = null;  // 새로운 출발지가 설정되었으므로 도착지는 null로 초기화
             }
         });
+
+        return routeDto[0];
     }
 
     private static void saveRoute(final RouteDto[] routeDto, UserDto userDto){

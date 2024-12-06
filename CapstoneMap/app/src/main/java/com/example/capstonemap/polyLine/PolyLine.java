@@ -96,7 +96,11 @@ public class PolyLine {
             return;
         }
 
-        PolylineOptions polylineOptions = new PolylineOptions().addAll(path).color(Color.BLUE).width(5);
+        PolylineOptions polylineOptions = new PolylineOptions()
+                .addAll(path)
+                .color(Color.BLUE)
+                .width(5)
+                .clickable(true);
         Polyline polyline = MapsActivity.getMap().addPolyline(polylineOptions);
 
         // Save the polyline for removal
@@ -187,6 +191,22 @@ public class PolyLine {
             value >>= 5;
         }
         encoded.append((char) (value + 63));
+    }
+
+    // 모든 폴리라인 제거
+    public static void removeAllPolylines() {
+        if (polylineMap.isEmpty()) {
+            Log.d("REMOVE_ALL_POLYLINES", "No polylines to remove.");
+            return;
+        }
+
+        for (Polyline polyline : polylineMap.values()) {
+            if (polyline != null) {
+                polyline.remove();
+            }
+        }
+        polylineMap.clear();
+        Log.d("REMOVE_ALL_POLYLINES", "All polylines removed.");
     }
 }
 
