@@ -106,6 +106,7 @@ public class PolyLine {
         // Save the polyline for removal
         String encodedPath = encodePolyline(path);
         polylineMap.put(encodedPath, polyline);
+        Log.d("DRAW_POLYLINE", "폴리라인 잘그려짐");
     }
 
     // 폴리라인 디코딩

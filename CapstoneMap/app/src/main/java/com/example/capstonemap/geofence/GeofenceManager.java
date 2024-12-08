@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -49,29 +51,39 @@ public class GeofenceManager {
     // radius는 범위
     // 각각 루트에 시작점에 왔을 때, 끝점에 갔을때를 의미한다.
     // CourseInOut의 그부분의 이벤트를 지정해주면 된다.
-    public void setupGeofence(double latitude, double longitude, float radius, String geofenceId) {
+    public void setupGeofence(double enterLatitude, double enterLongitude, double exitLatitude, double exitLongitude, float radius) {
         if (!checkAndRequestPermissions()) {
             Log.e(TAG, "Permission not granted. Cannot setup geofence.");
             return;
         }
 
-        Geofence geofence = new Geofence.Builder()
-                .setRequestId(geofenceId)
-                .setCircularRegion(latitude, longitude, radius)
+        // ENTER 지오펜스
+        Geofence enterGeofence = new Geofence.Builder()
+                .setRequestId("enterGeofence")
+                .setCircularRegion(enterLatitude, enterLongitude, radius)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                 .build();
 
+        // EXIT 지오펜스
+        Geofence exitGeofence = new Geofence.Builder()
+                .setRequestId("exitGeofence")
+                .setCircularRegion(exitLatitude, exitLongitude, radius)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
+
+        // GeofencingRequest 생성
         GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
                 .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                .addGeofence(geofence)
+                .addGeofence(enterGeofence)
+                .addGeofence(exitGeofence)
                 .build();
 
         geofencingClient.addGeofences(geofencingRequest, getGeofencePendingIntent())
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Geofence added successfully"))
-                .addOnFailureListener(e -> Log.e(TAG, "Failed to add geofence: " + e.getMessage()));
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Geofences added successfully"))
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to add geofences: " + e.getMessage()));
     }
-
     // 지오펜스 이벤트 처리
     private PendingIntent getGeofencePendingIntent() {
         Intent intent = new Intent(context, GeofenceBroadcastReceiver.class);

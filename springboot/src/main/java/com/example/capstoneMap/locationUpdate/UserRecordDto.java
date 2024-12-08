@@ -35,7 +35,7 @@ public class UserRecordDto {
 	}
 	
 	public UserRecord toEntity() {
-		return new UserRecord(id, elapsedTime, convertLocationListToJson(locationList));
+		return new UserRecord(id, userId, routeId, elapsedTime, convertLocationListToJson(locationList));
 	}
 	
 	private String convertLocationListToJson(List<Double[]> locationList) {

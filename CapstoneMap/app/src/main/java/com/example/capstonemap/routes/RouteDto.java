@@ -1,5 +1,6 @@
 package com.example.capstonemap.routes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import com.google.gson.annotations.SerializedName;
@@ -9,7 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RouteDto {
+public class RouteDto implements Serializable {
     @SerializedName("id")
     private Long id;
 

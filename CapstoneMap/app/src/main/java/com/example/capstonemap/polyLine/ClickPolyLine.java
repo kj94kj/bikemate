@@ -3,6 +3,7 @@ package com.example.capstonemap.polyLine;
 import static com.example.capstonemap.distance.DistancePolyLine.calculateTotalLength;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.capstonemap.distance.DistancePolyLine;
 import com.example.capstonemap.routes.RouteDto;
@@ -16,14 +17,14 @@ import java.util.ArrayList;
 
 public class ClickPolyLine {
     static RouteRepository routeRepository=new RouteRepository();
+    static RouteDto[] routeDto = new RouteDto[1];
 
-    public static RouteDto clickPolyLine(GoogleMap mMap) {
+    public static void clickPolyLine(GoogleMap mMap) {
         final LatLng[] origin = new LatLng[1];  // 출발지를 저장할 배열
         final LatLng[] destination = new LatLng[1];  // 도착지를 저장할 배열
-        final RouteDto[] routeDto = new RouteDto[1];
+        // final RouteDto[] routeDto = new RouteDto[1];
         Double[] startLocation=new Double[2];
         ArrayList<Double[]> locationList=new ArrayList<>();
-
 
         // 지도를 길게 눌렀을 때 마커를 추가하고 폴리라인을 그리는 기능 설정
         mMap.setOnMapLongClickListener(latLng -> {
@@ -61,6 +62,7 @@ public class ClickPolyLine {
                     System.out.println(gson.toJson(routeDto[0]));
 
                     // saveRoute(routeDto, userDto);
+
                 });
 
             } else {
@@ -71,19 +73,28 @@ public class ClickPolyLine {
                 destination[0] = null;  // 새로운 출발지가 설정되었으므로 도착지는 null로 초기화
             }
         });
-
-        return routeDto[0];
     }
 
-    private static void saveRoute(final RouteDto[] routeDto, UserDto userDto){
+    public static void saveRoute(UserDto userDto){
         Long userId= userDto.getId();
         System.out.println("User ID: " + userId);
 
+        if(routeDto[0] != null){
+            //리파지토리, 스프링과 연동해서 경로를 만들면 저장함
+            routeRepository.saveRoute(routeDto[0], userId,
+                    () -> System.out.println("Route saved successfully!"),
+                    () -> System.out.println("Error saving route")
+            );
+        }else{
+            System.out.println("null route");
+        }
+    }
 
-        //리파지토리, 스프링과 연동해서 경로를 만들면 저장함
-        routeRepository.saveRoute(routeDto[0], userId,
-                () -> System.out.println("Route saved successfully!"),
-                () -> System.out.println("Error saving route")
-        );
+    public static RouteDto getPolyLineRouteDto(){
+        return routeDto[0];
+    }
+
+    public static void disablePolylineDrawing(GoogleMap map) {
+        map.setOnMapLongClickListener(null);
     }
 }

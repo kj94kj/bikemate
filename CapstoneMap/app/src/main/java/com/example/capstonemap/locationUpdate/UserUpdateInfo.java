@@ -10,12 +10,17 @@ import android.os.Handler;
 import android.os.Vibrator;
 
 import com.example.capstonemap.AppContext;
+import com.example.capstonemap.MapsActivity;
 import com.example.capstonemap.R;
 import com.example.capstonemap.distance.DistancePolyLine;
 import com.example.capstonemap.distance.DistanceTwoLocation;
+import com.example.capstonemap.polyLine.PolyLine;
+import com.example.capstonemap.routes.RouteDto;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polyline;
 
 import android.media.SoundPool;
+import android.util.Log;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -59,10 +64,12 @@ public class UserUpdateInfo {
     //내 경주 순위(ranking과 다른 것 주의)
     private int raceRanking=0;
 
+    private RouteDto racingDto;
+
     //oldMyRecord: 나의 이전기록, oldOtherRecord: 경주하고 있는 기록
-    private UserRecordDto myRecordDto = new UserRecordDto(userId, routeId);
-    private UserRecordDto oldMyRecord;
-    private UserRecordDto oldOtherRecord;
+    private UserRecordDto myRecordDto = new UserRecordDto();   // 여기바꿈.
+    private UserRecordDto oldMyRecord = null;
+    private UserRecordDto oldOtherRecord = null;
 
     // 현재 유저의 시작점부터 거리, 기록 유저의 시작점부터 거리를 계산해서 넣어줄거임
     private double currentDistance = 0;
@@ -71,13 +78,25 @@ public class UserUpdateInfo {
     // 현재 달리고있는 폴리라인의 List<LatLng>을 set해야함.
     private List<LatLng> polyline;
 
+    Context context = MapsActivity.getAppContext();
+    SoundPool soundPool = new SoundPool.Builder().setMaxStreams(2).build();
+    int soundOne = soundPool.load(context, R.raw.short_beep, 1);
+    Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+
 
 
     // 기록 유저의 n초마다의 위치를 set하기 위해 만듦
+    // 끝점때문에 로직을 수정해야할수도있음.
     public void setOldLocation(){
-        if(counter < oldOtherRecord.getLocationList().size() )
+        if(counter < oldOtherRecord.getLocationList().size() ){
             oldLocation=oldOtherRecord.getLocationList().get(counter);
-        counter++;
+            counter++;
+        }else{
+            // 정확히 루트 끝점이 아닌거같음.
+            LatLng finalLocation = polyline.get(polyline.size()-1);
+            oldLocation[0]=racingDto.getLocationList().get(1)[0];
+            oldLocation[1]=racingDto.getLocationList().get(1)[1];
+        }
     }
 
     // 현재 내가 1등인지 2등인지 알려줌.
@@ -92,7 +111,10 @@ public class UserUpdateInfo {
         else
             rankingNow=2;
 
-        if(raceRanking!=0 && raceRanking !=rankingNow){
+        if(counter >= oldOtherRecord.getLocationList().size())
+            rankingNow=2;
+
+        if(counter > 1 && raceRanking !=rankingNow){
             raceRanking=rankingNow;
             raceAlarm(raceRanking);
         }
@@ -101,17 +123,15 @@ public class UserUpdateInfo {
     }
 
     public void raceAlarm(int raceRanking){
-        Context context = AppContext.getAppContext();
-        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        SoundPool soundPool = new SoundPool.Builder().setMaxStreams(2).build();
-        int soundOne = soundPool.load(context, R.raw.short_beep, 1);
         if(raceRanking == 1){
             vibrator.vibrate(200);
             soundPool.play(soundOne, 1, 1, 0, 0, 1);
+            System.out.println("진동소리 1등");
         }else if(raceRanking == 2){
             vibrator.vibrate(new long[]{0, 200, 150, 200}, -1); // 패턴: [시작 지연, 진동, 쉬는 시간, 진동]
             soundPool.play(soundOne, 1, 1, 0, 0, 1);
-            new Handler().postDelayed(() -> soundPool.play(soundOne, 1, 1, 0, 0, 1), 150);
+            new Handler().postDelayed(() -> soundPool.play(soundOne, 1, 1, 0, 0, 1), 300);
+            System.out.println("진동소리2등");
         }
     }
 
@@ -122,37 +142,52 @@ public class UserUpdateInfo {
 
     // 경주가 끝나고 내 예전 기록보다 내 현재 기록이 더 빠르면(작으면) 갱신하는 함수
     public void setUserRecordDto(){
+        String curElapsedTime="00:00:00";
         // elapsedTime(밀리초)을 우리가 보는 시간으로 나타내는과정
-        LocalDateTime dateTime = Instant.ofEpochMilli(elapsedTime)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
+        if (elapsedTime == 0) {
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String curElapsedTime = dateTime.format(formatter);
+        }else{
+            long hours = elapsedTime / 3600;
+            long minutes = (elapsedTime % 3600) / 60;
+            long seconds = elapsedTime % 60;
+
+            curElapsedTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        }
 
         if(oldMyRecord == null){
-            System.out.println("현재 기록은 "+curElapsedTime+" 입니다.");
-            System.out.println("기록이 저장 됩니다.");
+            Log.d("end", "현재 기록은 "+curElapsedTime+" 입니다.");
+            Log.d("end", "기록이 저장 됩니다.");
+            myRecordDto.setUserId(userId);
+            myRecordDto.setRouteId(routeId);
             myRecordDto.setLocationList(locationList);
             myRecordDto.setElapsedTime(elapsedTime);
+
+            Log.d("end", "현재 id은 "+userId+" 입니다.");
+
 
             // 이거하면 자동으로 랭킹은 저장됨.
             SaveMyRecord.saveMyRecord(myRecordDto, userId, routeId);
         }else{
-            LocalDateTime dateTime2 = Instant.ofEpochMilli(oldMyRecord.getElapsedTime())
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime();
+            String oldElapsedTime = "00:00:00";
 
-            DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            String oldElapsedTime = dateTime2.format(formatter2);
+            if (oldMyRecord.getElapsedTime() == 0) {
 
+            }else{
+                long hours = oldMyRecord.getElapsedTime() / 3600;
+                long minutes = (oldMyRecord.getElapsedTime() % 3600) / 60;
+                long seconds = oldMyRecord.getElapsedTime() % 60;
+
+                oldElapsedTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+            }
 
             // 이 메시지가 경주가 끝나면 출력되야함.
-            System.out.println("현재 기록은 "+curElapsedTime+" 입니다.");
-            System.out.println("이전 기록은 "+oldElapsedTime+" 입니다.");
+            Log.d("end", "현재 기록은 "+curElapsedTime+" 입니다.");
+            Log.d("end", "이전 기록은 "+oldElapsedTime+" 입니다.");
 
             if(oldMyRecord.getElapsedTime() - elapsedTime > 0){
                 System.out.println("기록이 갱신 됩니다.");
+                myRecordDto.setUserId(userId);
+                myRecordDto.setRouteId(routeId);
                 myRecordDto.setLocationList(locationList);
                 myRecordDto.setElapsedTime(elapsedTime);
 
@@ -165,5 +200,10 @@ public class UserUpdateInfo {
     public void setLocation(Double[] currentLocation){
         this.currentLocation=currentLocation;
         locationList.add(currentLocation);
+    }
+
+    public void setRacingDto(RouteDto routeDto){
+        racingDto = routeDto;
+        polyline = PolyLine.decodePolyline(racingDto.getEncodedPath());
     }
 }

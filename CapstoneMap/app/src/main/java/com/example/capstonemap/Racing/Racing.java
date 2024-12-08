@@ -1,5 +1,7 @@
 package com.example.capstonemap.Racing;
 
+import android.util.Log;
+
 import com.example.capstonemap.locationUpdate.GetOldRecord;
 import com.example.capstonemap.locationUpdate.GetTop5Record;
 import com.example.capstonemap.locationUpdate.UserRecordApiService;
@@ -25,11 +27,16 @@ public class Racing {
 
     // 나의 옛날기록과 레이싱
     public static int myRacing(UserUpdateInfo userUpdateInfo){
+        Log.d("myRacing", "1st");
+
+        Log.d("myRacing", "fffee");
 
         if(userUpdateInfo.getOldMyRecord() == null){
+            Log.d("myRacing", "2st");
             System.out.println("oldMyRecord 없음");
             return -1;
         }else{
+            Log.d("myRacing", "3st");
             userUpdateInfo.setOldOtherRecord(userUpdateInfo.getOldMyRecord());
         }
 
@@ -61,9 +68,7 @@ public class Racing {
         RivalDto rivalDto=GetRival.getRival(userUpdateInfo.getUserId(), userUpdateInfo.getRouteId());
 
         if(rivalDto.getOtherId().contains(otherId)){
-            UserRecordDto otherRecordDto = GetOldRecord.getOldRecord(otherId, userUpdateInfo.getRouteId());
-
-            userUpdateInfo.setOldOtherRecord(otherRecordDto);
+            GetOldRecord.getOldRecord(otherId, userUpdateInfo.getRouteId());
         }else{
             System.out.println("rival이 없음");
             return -1;

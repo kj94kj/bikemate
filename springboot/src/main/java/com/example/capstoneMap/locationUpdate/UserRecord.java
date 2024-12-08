@@ -37,13 +37,24 @@ public class UserRecord {
 	private Long routeId;
 	
 	private Long elapsedTime;
+	
+    @Column(columnDefinition = "LONGTEXT")
 	private String locationListJson;
 	
     @Transient
+    @Column(columnDefinition = "LONGTEXT")
 	private List<Double[]> locationList;
 	
 	public UserRecord(Long id, Long elapsedTime, String locationListJson) {
 		this.id=id;
+		this.elapsedTime=elapsedTime;
+		this.locationListJson=locationListJson;
+	}
+	
+	public UserRecord(Long id, Long userId, Long routeId, Long elapsedTime, String locationListJson) {
+		this.id=id;
+		this.userId = userId;
+		this.routeId = routeId;
 		this.elapsedTime=elapsedTime;
 		this.locationListJson=locationListJson;
 	}

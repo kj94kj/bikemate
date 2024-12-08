@@ -1,5 +1,7 @@
 package com.example.capstonemap.currentMapBound;
 
+import android.util.Log;
+
 import com.example.capstonemap.routes.RouteDto;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -38,10 +40,13 @@ public class CurrentMapBound {
 
         googleMap.setOnCameraIdleListener(() -> {
             // 현재 화면 범위 계산
+            Log.d("CurrentMapBound", "Camera idle detected");
             LatLngBounds bounds = getCurrentMapBounds(googleMap);
 
             // 화면 범위 내의 루트 필터링
             List<RouteDto> boundRouteDtoList = getBoundRouteDtoList(allRoutes, bounds);
+
+            Log.d("CurrentMapBound", "Bounded routes: " + boundRouteDtoList.size());
 
             listener.onBound(boundRouteDtoList);
         });

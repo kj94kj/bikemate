@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.capstonemap.MapsActivity;
 import com.example.capstonemap.locationUpdate.UserUpdateInfo;
@@ -11,20 +12,15 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
 public class RouteInOut extends BroadcastReceiver {
-    private static final String TAG = "CourseInOut";
+    private static final String TAG = "RouteInOut";
 
     private final GeoFenceListener geoFenceListener;
 
-
+    // GeoFenceListener를 받도록 생성자 추가
     public RouteInOut(GeoFenceListener geoFenceListener) {
         this.geoFenceListener = geoFenceListener;
     }
 
-    // GeofenceManager 클래스는 지오펜스를 설정하는 것인데 여기서 시작점, 끝점의 좌표를 넣고 2개 생성하면
-    // RouteInOut클래스에서 그 두개를 각각 GEOFENCE_TRANSITION_ENTER와 GEOFENCE_TRANSITION_EXIT로 받는다.
-    // 각각 루트에 시작점에 왔을 때, 끝점에 갔을때를 의미한다.
-    // RouteInOut의 그부분의 이벤트를 지정해주면 된다.
-    // 나중에는 경주시작 버튼도 만들어야한다.
     @Override
     public void onReceive(Context context, Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
@@ -35,21 +31,19 @@ public class RouteInOut extends BroadcastReceiver {
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+            Log.d(TAG, "Entered Geofence");
 
-            MapsActivity.setUserUpdateInfo();
-            MapsActivity.isInRoute = true;
-
-            Log.d(TAG, "Geofence Entered");
+            // 시작 이벤트
             geoFenceListener.onGeofenceEnter();
+
+            Toast.makeText(context, "Entered the Route", Toast.LENGTH_SHORT).show();
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            Log.d(TAG, "Exited Geofence");
 
-            // 끝점에 갔으니까 SaveMyRecord도 불러야함.
-
-            MapsActivity.setEndUserUpdateInfo();
-            MapsActivity.isInRoute = false;
-
-            Log.d(TAG, "Geofence Exited");
+            // 종료 이벤트
             geoFenceListener.onGeofenceExit();
+
+            Toast.makeText(context, "Exited the Route", Toast.LENGTH_SHORT).show();
         } else {
             Log.e(TAG, "Unknown geofence transition: " + geofenceTransition);
         }
