@@ -9,6 +9,7 @@ public class DistanceTwoLocation {
     }
 
     // 나를 locationMe에 넣고 비교하는 상대를 locationOther에 넣는다. km 단위로 거리를 알려준다.
+    // 미터단위이다.
     static public double calculateDistance(LatLng point1, LatLng point2){
         final int EARTH_RADIUS = 6371000; // in meters
 

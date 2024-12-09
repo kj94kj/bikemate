@@ -12,6 +12,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.provider.ProviderProperties;
@@ -62,6 +64,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -312,6 +315,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // (2) 루트 저장버튼
         Button saveRouteButton = findViewById(R.id.save_route_button);
         saveRouteButton.setOnClickListener(v -> {
+            LatLng startLocation = DistanceTwoLocation.doubleToLatLng(
+                    ClickPolyLine.getPolyLineRouteDto().getStartLocation());
+
             ClickPolyLine.saveRoute(userDto);
             boundRouteDtoList=CurrentMapBound.getBoundRouteDtoList(allRouteDtoList, CurrentMapBound.getCurrentMapBounds(mMap));
             if(ClickPolyLine.getPolyLineRouteDto()!=null){
@@ -623,4 +629,5 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static Context getAppContext() {
         return appContext;
     }
+
 }

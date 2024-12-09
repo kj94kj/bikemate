@@ -2,9 +2,13 @@ package com.example.capstonemap.polyLine;
 
 import static com.example.capstonemap.distance.DistancePolyLine.calculateTotalLength;
 
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.capstonemap.MapsActivity;
 import com.example.capstonemap.distance.DistancePolyLine;
 import com.example.capstonemap.routes.RouteDto;
 import com.example.capstonemap.routes.RouteRepository;
@@ -13,7 +17,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class ClickPolyLine {
     static RouteRepository routeRepository=new RouteRepository();
@@ -56,7 +63,13 @@ public class ClickPolyLine {
 
                     Double length = DistancePolyLine.calculateTotalLength(DistancePolyLine.encodedToLatLng(encodedPath));
 
-                    routeDto[0] = new RouteDto("temporal", encodedPath, locationList, startLocation, length);
+                    String[] locationDetails = getSubLocalityAndFeatureName(MapsActivity.getAppContext(), startLocation[0], startLocation[1]);
+                    String subLocality = locationDetails[0];
+                    String featureName = locationDetails[1];
+
+                    String fullName=subLocality+" "+featureName;
+
+                    routeDto[0] = new RouteDto(fullName, encodedPath, locationList, startLocation, length);
 
                     Gson gson = new Gson();
                     System.out.println(gson.toJson(routeDto[0]));
@@ -96,5 +109,22 @@ public class ClickPolyLine {
 
     public static void disablePolylineDrawing(GoogleMap map) {
         map.setOnMapLongClickListener(null);
+    }
+
+    private static String[] getSubLocalityAndFeatureName(Context context, double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(context, Locale.KOREA);
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address address = addresses.get(0);
+                String subLocality = address.getSubLocality(); // 구/군 이름
+                String featureName = address.getFeatureName(); // 랜드마크 이름
+
+                return new String[]{subLocality, featureName};
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new String[]{"정보 없음", "정보 없음"};
     }
 }

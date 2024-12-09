@@ -11,6 +11,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RouteRepository {
+    // 여기다가 이름도 적어서 보내야함.
     public void saveRoute(RouteDto routeDto, Long userId, Runnable onSuccess, Runnable onError) {
         ApiClient.getRouteApiService().saveRoute(routeDto, userId).enqueue(new Callback<Void>() {
             @Override
