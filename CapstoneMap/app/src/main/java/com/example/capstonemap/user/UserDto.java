@@ -1,6 +1,7 @@
 package com.example.capstonemap.user;
 
 import com.example.capstonemap.routes.RouteDto;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class UserDto {
+    @SerializedName("id")
     private Long id;
     private String username;
     private String password;

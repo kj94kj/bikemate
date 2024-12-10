@@ -12,6 +12,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -24,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.capstonemap.Racing.Racing;
@@ -64,6 +66,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,13 +96,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // 모든 루트를 저장하는 dto
     private List<RouteDto> allRouteDtoList = new ArrayList<>();
+    private List<RouteDto> userIdRecordDtoList = new ArrayList<>();
 
     // 현재 맵 범위에 있는 루트를 받는 dto
     private List<RouteDto> boundRouteDtoList = new ArrayList<>();
     private ArrayList<RouteDto> arrayBoundRouteDtoList = new ArrayList<>();
+    private ArrayList<RouteDto> arrayIdRecordDtoList = new ArrayList<>();
+    private ArrayList<RouteDto> arrayAllRouteDtoList = new ArrayList<>();
 
     // 지정한 길이의 모든 routeDtoList를 받는 dto
     private List<RouteDto> allLengthRouteDtoList = new ArrayList<>();
+    UserDto userDto;
 
     // 루트에 있을 때만 UserUpdateInfo에 좌표값, 속도값을 넣으려고함.
     // RouteInOut과 연관된 변수.
@@ -115,7 +123,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static boolean isRaceEnded =false;
 
     public static boolean isMapReady=false;
+    public static boolean routeCreation = false;
     private static Context appContext;
+
+
+    // 레이싱 고르기 버튼을 만들어야함.
+    RadioGroup radioGroup;
+    Button buttonPrepare;
+    Button buttonRouteManagement;
+    Button saveRouteButton;
+    Button cancelRouteButton;
+    SearchView searchView;
 
     // 일단 userId = 1, routeId = 1로 설정함.
     // 사실은 유저가 바뀔때마다 루트가 바뀔때마다 다르게 설정해줘야함.
@@ -136,9 +154,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        //임시적인 유저생성 지워야함.
+        userDto=new UserDto(1L, "a", "a");
+
         // 모든 루트 담음.
         allRouteDtoList = new ArrayList<>();
         allRouteDtoList = GetRoutes.getAllRoutes();
+        userIdRecordDtoList = new ArrayList();
+        userIdRecordDtoList = GetRoutes.getRoutesByRecordUserId(userDto.getId());
 
         // FusedLocationProviderClient 및 LocationRequest 설정
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -155,7 +178,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Toast.makeText(this, "isRouteSelected true임", Toast.LENGTH_SHORT).show();
 
         }
-
 
         // LocationManager 초기화 및 모의 위치 제공자 설정
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -178,15 +200,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         searchLocation = new SearchLocation(this);
         setupSearchListener();
 
-        Button buttonRouteManagement = findViewById(R.id.button_route_management);
+
+        buttonRouteManagement = findViewById(R.id.button_route_management);
         buttonRouteManagement.setOnClickListener(v -> {
+            // 코스 관리 액티비티로 넘어감.
             isMapReady=false;
+            arrayIdRecordDtoList = (ArrayList<RouteDto>) userIdRecordDtoList;
+            intent.putExtra("userIdRecordDtoList", arrayIdRecordDtoList);
+            arrayAllRouteDtoList = (ArrayList<RouteDto>) allRouteDtoList;
+            intent.putExtra("allRouteDtoList", arrayAllRouteDtoList);
+            intent.putExtra("userId", userDto.getId());
             startActivity(intent);
         });
 
         // UI 요소
         Button toggleButton = findViewById(R.id.toggle_button); // XML에서 정의된 버튼
         View filterButton = findViewById(R.id.filter_button); // visibility를 토글할 버튼
+
+        radioGroup = findViewById(R.id.radioGroup);
+        buttonPrepare = findViewById(R.id.button_prepare);
+
+        radioGroup.setVisibility(View.GONE);
+        buttonPrepare.setVisibility(View.GONE);
 
         // 가시성 토글 이벤트 설정
         toggleButton.setOnClickListener(v -> {
@@ -240,6 +275,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 racingMode = -1;
                                 racingModeCheck = -1;
                                 PolyLine.removeAllPolylines();
+
+                                searchView.setVisibility(View.VISIBLE);
+                                binding.GetAllRoutesButton.setVisibility(View.VISIBLE);
+                                binding.GetUserRoutesButton.setVisibility(View.VISIBLE);
+                                buttonRouteManagement.setVisibility(View.VISIBLE);
                                 Log.d("racing", "ended racing");
                             }
                         }
@@ -287,9 +327,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        //임시적인 유저생성 지워야함.
-        UserDto userDto=new UserDto(1L, "a", "a");
-
         //boundedRouteDto에 담음, 이거 조건잘 다는게 좋을듯.. allrouteDtoList가 빈걸 반환가능함.
         if(allLengthRouteDtoList != null && !allLengthRouteDtoList.isEmpty()){
             CurrentMapBound.cameraBoundListener(mMap, allLengthRouteDtoList, this);
@@ -304,38 +341,75 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             PolyLine.drawPolylineOnMap(PolyLine.decodePolyline(racingRoute.getEncodedPath()));
         }
 
+        TextView explanationText = findViewById(R.id.explanationText);
+        explanationText.setText("1. 2개의 위치를 꾹 누르면 경로가 그려진다.\n2. 생성 버튼을 누르고 정보를 입력한다.\n3. 완료 버튼을 누르면 생성된다.");
+        explanationText.setBackgroundColor(Color.parseColor("#D3D3D3"));
+        explanationText.setVisibility(View.GONE);
+
         // 이게 경로 만들기 활성화 버튼이 됨.
         Button routeCreateButton = findViewById(R.id.route_create_button);
         routeCreateButton.setOnClickListener(v -> {
             ClickPolyLine.disablePolylineDrawing(mMap);
             ClickPolyLine.clickPolyLine(mMap);
+            saveRouteButton.setVisibility(View.VISIBLE);
+            cancelRouteButton.setVisibility(View.VISIBLE);
+            explanationText.setVisibility(View.VISIBLE);
             Toast.makeText(this, "루트 생성 모드 활성화", Toast.LENGTH_SHORT).show();
         });
 
-        // (2) 루트 저장버튼
-        Button saveRouteButton = findViewById(R.id.save_route_button);
-        saveRouteButton.setOnClickListener(v -> {
-            LatLng startLocation = DistanceTwoLocation.doubleToLatLng(
-                    ClickPolyLine.getPolyLineRouteDto().getStartLocation());
 
-            ClickPolyLine.saveRoute(userDto);
-            boundRouteDtoList=CurrentMapBound.getBoundRouteDtoList(allRouteDtoList, CurrentMapBound.getCurrentMapBounds(mMap));
-            if(ClickPolyLine.getPolyLineRouteDto()!=null){
-                allRouteDtoList.add(ClickPolyLine.getPolyLineRouteDto());
+        // (2) 루트 저장버튼
+        saveRouteButton = findViewById(R.id.save_route_button);
+        saveRouteButton.setVisibility(View.GONE);
+        saveRouteButton.setOnClickListener(v -> {
+            if(ClickPolyLine.getPolyLineRouteDto() == null){
+                Toast.makeText(this, "경로를 그리지 않았습니다.", Toast.LENGTH_SHORT).show();
+            }else{
+                LatLng startLocation = DistanceTwoLocation.doubleToLatLng(
+                        ClickPolyLine.getPolyLineRouteDto().getStartLocation());
+
+                ClickPolyLine.saveRoute(userDto);
+                allRouteDtoList=GetRoutes.getAllRoutes();
+                userIdRecordDtoList=GetRoutes.getRoutesByRecordUserId(userDto.getId());
+                boundRouteDtoList=CurrentMapBound.getBoundRouteDtoList(allRouteDtoList, CurrentMapBound.getCurrentMapBounds(mMap));
+                if(ClickPolyLine.getPolyLineRouteDto()!=null){
+                    allRouteDtoList.add(ClickPolyLine.getPolyLineRouteDto());
+                }
+                ClickPolyLine.disablePolylineDrawing(mMap);
+                PolyLine.removeAllPolylines();
+                allRouteDtoList=GetRoutes.getAllRoutes();
+                saveRouteButton.setVisibility(View.GONE);
+                cancelRouteButton.setVisibility(View.GONE);
+                explanationText.setVisibility(View.GONE);
+
+                Toast.makeText(this, "루트가 저장되었습니다.", Toast.LENGTH_SHORT).show();
             }
-            ClickPolyLine.disablePolylineDrawing(mMap);
-            PolyLine.removeAllPolylines();
-            allRouteDtoList=GetRoutes.getAllRoutes();
-            Toast.makeText(this, "루트가 저장되었습니다.", Toast.LENGTH_SHORT).show();
         });
 
-        Button cancelRouteButton = findViewById(R.id.cancel_route_button);
+        cancelRouteButton = findViewById(R.id.cancel_route_button);
+        cancelRouteButton.setVisibility(View.GONE);
         cancelRouteButton.setOnClickListener(v -> {
             ClickPolyLine.disablePolylineDrawing(mMap);
             PolyLine.removeAllPolylines();
-
+            cancelRouteButton.setVisibility(View.GONE);
+            saveRouteButton.setVisibility(View.GONE);
+            explanationText.setVisibility(View.GONE);
             Toast.makeText(this, "루트 생성이 취소되었습니다.", Toast.LENGTH_SHORT).show();
         });
+
+
+        /*if("RouteManagementActivity".equals(intentRM.getStringExtra("routeCreation"))){
+            routeCreation=true;
+
+            ClickPolyLine.disablePolylineDrawing(mMap);
+            ClickPolyLine.clickPolyLine(mMap);
+
+            saveRouteButton.setVisibility(View.VISIBLE);
+            cancelRouteButton.setVisibility(View.VISIBLE);
+            explanationText.setVisibility(View.VISIBLE);
+        }*/
+
+
 
         // 위치 업데이트 시작
         startLocationUpdates();
@@ -344,8 +418,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // startMockMovement();
 
         //AllRoutesButton(임시), User의 id를 매개변수로 받는 getUesrRoutesButton(임시)
-        GetRoutes.getAllRoutesButton(binding);
-        GetUserRoutes.getUserRoutesButton(binding, userDto.getId());
+        GetRoutes.getAllRoutesButton(binding, allRouteDtoList);
+        GetRoutes.getUserIdRecordDtoListButton(binding, userIdRecordDtoList, userDto.getId());
 
         DeleteRoute.deleteButton(binding,1L, 1L);
 
@@ -518,14 +592,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // 여기서 boundRouteDto를 루트관리창에 넘겨줌.
         // 어레이 리스트를 넘겨야하기때문에 boundRouteDtoList를 어레이리스트로 바꿨음.
         arrayBoundRouteDtoList=(ArrayList<RouteDto>) boundRouteDtoList;
-        intent.putExtra("arrayBoundRouteDtoList", arrayBoundRouteDtoList);
+        // 여기 12.10
+        //  intent.putExtra("arrayBoundRouteDtoList", arrayBoundRouteDtoList);
+        // intent.putExtra("userId", userDto.getId());
         // startActivity(intent);
     }
 
 
     // 검색창관련
     private void setupSearchListener() {
-        SearchView searchView = findViewById(R.id.search_location);
+        searchView = findViewById(R.id.search_location);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -536,7 +612,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     // 지도 이동
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 
-                    // 마커 추가
+                    // ?? 마커 추가
                     mMap.addMarker(new MarkerOptions().position(latLng).title(query));
 
                     Toast.makeText(MapsActivity.this, "Moved to " + query, Toast.LENGTH_SHORT).show();
@@ -588,11 +664,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Toast.makeText(this, "유저 정보 set함", Toast.LENGTH_SHORT).show();
                     oldRecord=null;
                 }*/
-
-                // 레이싱 고르기 버튼을 만들어야함.
-                RadioGroup radioGroup = findViewById(R.id.radioGroup);
-                Button buttonPrepare = findViewById(R.id.button_prepare);
-
+                // main 상태 컴포넌트
+                binding.GetAllRoutesButton.setVisibility(View.GONE);
+                binding.GetUserRoutesButton.setVisibility(View.GONE);
+                buttonRouteManagement.setVisibility(View.GONE);
+                radioGroup.setVisibility(View.VISIBLE);
+                buttonPrepare.setVisibility(View.VISIBLE);
 
                 radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                     if (checkedId == R.id.radio_no_one) {
@@ -614,6 +691,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (racingMode == racingModeCheck) {
                         // 준비 상태가 올바른 경우
                         Toast.makeText(this, "레이싱 준비 완료!", Toast.LENGTH_SHORT).show();
+
+                        radioGroup.setVisibility(View.GONE);
+                        buttonPrepare.setVisibility(View.GONE);
+
                         // 다음 화면으로 이동하거나 경주 시작
                         isModeCheck=true;
                         // 지오펜스
@@ -623,6 +704,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         Toast.makeText(this, "올바른 모드를 선택해주세요.", Toast.LENGTH_SHORT).show();
                     }
                 });
+            }else{
+                searchView.setVisibility(View.VISIBLE);
+                binding.GetAllRoutesButton.setVisibility(View.VISIBLE);
+                binding.GetUserRoutesButton.setVisibility(View.VISIBLE);
+                buttonRouteManagement.setVisibility(View.VISIBLE);
             }
     }
 

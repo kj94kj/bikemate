@@ -1,5 +1,6 @@
 package com.example.capstonemap.routes;
 
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 
@@ -66,13 +67,29 @@ public class GetRoutes {
         }
     }
 
-    public static void getAllRoutesButton(ActivityMapsBinding binding){
+    public static void getAllRoutesButton(ActivityMapsBinding binding, List<RouteDto> routeDtoList){
         binding.GetAllRoutesButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         // GetAllRoutes의 getAllRoutes 메서드를 호출하여 루트 가져오기
-                        getAllRoutes();
+                        List<RouteDto> newRoutes = getAllRoutes(); // 새로운 데이터를 가져옴
+                        routeDtoList.clear(); // 기존 리스트를 비움
+                        routeDtoList.addAll(newRoutes);
+                    }
+                }
+        );
+    }
+
+    public static void getUserIdRecordDtoListButton(ActivityMapsBinding binding, List<RouteDto> routeDtoList, Long userId){
+        binding.GetUserRoutesButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // GetAllRoutes의 getAllRoutes 메서드를 호출하여 루트 가져오기
+                        List<RouteDto> newRoutes = getRoutesByRecordUserId(userId); // 새로운 데이터를 가져옴
+                        routeDtoList.clear(); // 기존 리스트를 비움
+                        routeDtoList.addAll(newRoutes);
                     }
                 }
         );
@@ -90,6 +107,26 @@ public class GetRoutes {
     public static List<RouteDto> getLengthRoutes(Double minLength, Double maxLength) {
         routeRepository.getLengthRoutes(
                 minLength, maxLength,
+                // 성공 시 routeDtoList에 데이터 저장
+                routes -> {
+                    routeDtoList.clear();
+                    routeDtoList.addAll(routes);
+                    System.out.println("모든 루트가 routeDtoList에 저장되었습니다.");
+
+                    drawAllRoutes(routeDtoList);
+                },
+                // 실패 시 처리
+                () -> {
+                    System.out.println("루트 조회에 실패했습니다.");
+                }
+        );
+
+        return routeDtoList;
+    }
+
+    public static List<RouteDto> getRoutesByRecordUserId(Long userId) {
+        routeRepository.getRoutesByRecordUserId(
+                userId,
                 // 성공 시 routeDtoList에 데이터 저장
                 routes -> {
                     routeDtoList.clear();

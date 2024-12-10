@@ -33,5 +33,8 @@ public interface RouteApiService {
 
     @GET("/api/users/length/routes/{minLength}/{maxLength}")
     Call<List<RouteDto>> getLengthRoutes(@Path("minLength") Double minLength, @Path("maxLength") Double maxLength);
+
+    @GET("/api/users/{userId}/records")
+    Call<List<RouteDto>> getRoutesByRecordUserId(@Path("userId") Long userId);
 }
     

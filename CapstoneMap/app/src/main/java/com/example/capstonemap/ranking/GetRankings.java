@@ -15,7 +15,7 @@ public class GetRankings {
     static List<RankingDto> rankingDtoList= new ArrayList<>();
     static RankingDto myRankingDto = new RankingDto();
 
-    private static List<RankingDto> getRankings(Long routeId) {
+    public static List<RankingDto> getRankings(Long routeId) {
         rankingRepository.getRankings(
                 routeId,
                 rankings -> {
@@ -31,7 +31,7 @@ public class GetRankings {
         return rankingDtoList;
     }
 
-    private static RankingDto getMyRanking(Long userId, Long routeId) {
+    public static RankingDto getMyRanking(Long userId, Long routeId) {
         rankingRepository.getMyRanking( userId, routeId,
                 // 성공 시 routeDtoList에 데이터 저장
                 ranking-> {

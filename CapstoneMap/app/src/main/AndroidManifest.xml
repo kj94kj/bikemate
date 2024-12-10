@@ -50,6 +50,7 @@
         </activity>
 
         <activity android:name=".RouteManagementActivity" />
+        <activity android:name=".RecordActivity" />
 
 
     </application>

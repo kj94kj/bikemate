@@ -33,7 +33,7 @@ public class GetUserRoutes {
         return userRouteDtoList;
     }
 
-    public static void getUserRoutesButton(ActivityMapsBinding binding, Long userId){
+    /*public static void getUserRoutesButton(ActivityMapsBinding binding, Long userId){
         binding.GetUserRoutesButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -43,7 +43,7 @@ public class GetUserRoutes {
                     }
                 }
         );
-    }
+    }*/
 
     public static void getUserRouteList(ActivityMapsBinding binding){
         StringBuilder routesText = new StringBuilder();

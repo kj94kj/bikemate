@@ -179,6 +179,14 @@
             android:layout_marginTop="16dp"
             android:text="준비" />
 
+        <TextView
+            android:id="@+id/explanationText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#DCDCDC"
+            android:text="1. 2개의 위치를 꾹 누르면 경로가 그려진다.\n2. 생성 버튼을 누르고 코스 정보를 입력한다.\n3. 완료 버튼을 누르면 코스가 생성된다."
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
     </LinearLayout>
 
     <!-- 새로 추가된 버튼 -->

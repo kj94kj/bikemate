@@ -2,15 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- 임시로 버튼만 추가 -->
-    <Button
-        android:id="@+id/button_test"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Test Button" />
+    <ImageButton
+        android:id="@+id/back_arrow_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/back_arrow" />
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -26,7 +27,15 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"/>
 
-    </LinearLayout>
+        <ImageButton
+            android:id="@+id/create_course_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/plus" />
 
+
+    </LinearLayout>
 
 </LinearLayout>
