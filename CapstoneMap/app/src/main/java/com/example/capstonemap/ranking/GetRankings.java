@@ -1,5 +1,6 @@
 package com.example.capstonemap.ranking;
 
+import com.example.capstonemap.RecordActivity;
 import com.example.capstonemap.routes.RouteDto;
 import com.example.capstonemap.routes.RouteRepository;
 
@@ -15,37 +16,43 @@ public class GetRankings {
     static List<RankingDto> rankingDtoList= new ArrayList<>();
     static RankingDto myRankingDto = new RankingDto();
 
-    public static List<RankingDto> getRankings(Long routeId) {
+    public static void getRankings(Long routeId, RankingsCallback callback) {
         rankingRepository.getRankings(
                 routeId,
                 rankings -> {
-                    rankingDtoList.clear();
-                    rankingDtoList.addAll(rankings);
+                    callback.onSuccess(rankings);
                     System.out.println("모든 랭킹이 rankingDtoList에 저장되었습니다.");
                 },
                 () -> {
+                    callback.onFailure();
                     System.out.println("랭킹 조회에 실패했습니다.");
                 }
         );
-
-        return rankingDtoList;
     }
 
-    public static RankingDto getMyRanking(Long userId, Long routeId) {
-        rankingRepository.getMyRanking( userId, routeId,
-                // 성공 시 routeDtoList에 데이터 저장
-                ranking-> {
-                    myRankingDto = ranking;
+    public static void getMyRanking(Long userId, Long routeId, MyRankingCallback callback) {
+        rankingRepository.getMyRanking(
+                userId, routeId,
+                ranking -> {
+                    callback.onSuccess(ranking);
                     System.out.println("랭킹이 있습니다.");
                 },
-                // 실패 시 처리
                 () -> {
-                    myRankingDto=null;
-                    System.out.println("랭킹이 없습니다.");
+                    callback.onFailure();
+                    System.out.println("랭킹 조회 실패.");
                 }
         );
+    }
 
-        return myRankingDto;
+    // 콜백 인터페이스 정의
+    public interface RankingsCallback {
+        void onSuccess(List<RankingDto> rankings);
+        void onFailure();
+    }
+
+    public interface MyRankingCallback {
+        void onSuccess(RankingDto ranking);
+        void onFailure();
     }
 
 }

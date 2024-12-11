@@ -15,125 +15,134 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 햄버거 버튼 -->
-
     <LinearLayout
-        android:layout_width="413dp"
-        android:layout_height="729dp"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteX="-1dp"
-        tools:layout_editor_absoluteY="0dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="51dp"
+            android:id="@+id/searchBarLayout"
+            android:layout_width="350dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="14dp"
+            android:background="#FFFFFF"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/button_route_management"
-                android:layout_width="160dp"
-                android:layout_height="35dp"
-                android:layout_margin="16dp"
-                android:text="Route Management" />
+            <SearchView
+                android:id="@+id/search_location"
+                android:layout_width="143dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:queryHint="원하는 위치를 입력하세요." />
 
-            <Button
+            <ImageButton
                 android:id="@+id/filter_button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="필터 적용" />
-
-            <androidx.appcompat.widget.SearchView
-                android:id="@+id/search_location"
-                android:layout_width="139dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:inputType="text"
-                android:queryHint="Search location"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="51dp"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/GetUserRoutesButton"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="16dp"
-                android:text="Get User Routes" />
-
-            <Button
-                android:id="@+id/DeleteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="16dp"
-                android:text="Delete Route" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/GetAllRoutesButton"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="16dp"
-                android:text="Get All Routes" />
-
-            <TextView
-                android:id="@+id/speedTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|center_horizontal"
-                android:background="#AA000000"
-                android:padding="8dp"
-                android:text="Speed: 0.00 km/h"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp" />
+                android:layout_height="match_parent"
+                app:srcCompat="@android:drawable/ic_menu_manage" />
 
         </LinearLayout>
+    </LinearLayout>
 
-        <TextView
-            android:id="@+id/routeTextView"
-            android:layout_width="199dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="루트 목록이 여기에 표시됩니다."
-            android:textColor="#000000"
-            android:textSize="16sp" />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/GetAllRoutesButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.954"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44"
+        app:srcCompat="@android:drawable/stat_notify_sync_noanim" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/GetUserRoutesButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.954"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44"
+        app:srcCompat="@android:drawable/stat_notify_sync_noanim" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/button_route_management"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.045"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44"
+        app:srcCompat="@android:drawable/ic_dialog_map" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/route_create_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.045"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.303"
+        app:srcCompat="@drawable/plus" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.95">
 
         <Button
-            android:id="@+id/toggle_button"
-            android:layout_width="wrap_content"
+            android:id="@+id/button_prepare"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_margin="16dp"
-            android:text="Toggle Filter" />
+            android:text="준비" />
+
+        <Space
+            android:layout_width="50dp"
+            android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/route_create_button"
-            android:layout_width="wrap_content"
+            android:id="@+id/back_button"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:text="루트 생성 모드" />
+            android:text="뒤로가기" />
+
+    </LinearLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="-38dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <RadioGroup
             android:id="@+id/radioGroup"
             android:layout_width="193dp"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="438dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <RadioButton
                 android:id="@+id/radio_no_one"
@@ -153,31 +162,19 @@
                 android:layout_height="wrap_content"
                 android:text="랜덤 레이싱" />
 
-            <RadioButton
-                android:id="@+id/radio_rival"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="라이벌 레이싱" />
         </RadioGroup>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <Button
-            android:id="@+id/save_route_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="저장" />
-
-        <Button
-            android:id="@+id/cancel_route_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="취소" />
-
-        <Button
-            android:id="@+id/button_prepare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="준비" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.96">
 
         <TextView
             android:id="@+id/explanationText"
@@ -187,16 +184,43 @@
             android:text="1. 2개의 위치를 꾹 누르면 경로가 그려진다.\n2. 생성 버튼을 누르고 코스 정보를 입력한다.\n3. 완료 버튼을 누르면 코스가 생성된다."
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/save_route_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="생성" />
+
+            <Space
+                android:layout_width="10dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/cancel_route_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="취소" />
+        </LinearLayout>
+
     </LinearLayout>
 
-    <!-- 새로 추가된 버튼 -->
-
-    <!-- Search Bar -->
-
-    <!-- 필터 버튼 -->
-
-    <!-- RouteManagementActivity로 가는 버튼-->
-
-    <!-- 테스트용 visibility 버튼-->
+    <ListView
+        android:id="@+id/route_list_view"
+        android:layout_width="350dp"
+        android:layout_height="150dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="#E0E0E0"
+         android:padding="8dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

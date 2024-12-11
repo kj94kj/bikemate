@@ -1,5 +1,6 @@
 package com.example.capstonemap.polyLine;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,6 +10,8 @@ import com.example.capstonemap.BuildConfig;
 import com.example.capstonemap.MakeApiRequest.MakeApiRequest;
 import com.example.capstonemap.MapsActivity;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
@@ -25,6 +28,7 @@ public class PolyLine {
 
     private static final HashMap<String, Polyline> polylineMap = new HashMap<>();
     private static String lastEncoded;
+    private static final List<Marker> markerList = new ArrayList<>();
 
     // Directions API 호출
     public static void getDirections(LatLng origin, LatLng destination, OnEncodedPathReadyCallback callback) {
@@ -99,8 +103,25 @@ public class PolyLine {
         PolylineOptions polylineOptions = new PolylineOptions()
                 .addAll(path)
                 .color(Color.BLUE)
-                .width(5)
+                .width(15)
                 .clickable(true);
+        LatLng startPoint = path.get(0); // 경로의 첫 번째 점
+
+        String[] locationDetails =  ClickPolyLine.getSubLocalityAndFeatureName(MapsActivity.getAppContext(), startPoint.latitude, startPoint.longitude);
+        String subLocality = locationDetails[0];
+        String featureName = locationDetails[1];
+
+        String fullName=subLocality+" "+featureName;
+
+
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(startPoint)
+                .title(fullName); // 마커 제목
+        Marker marker = MapsActivity.getMap().addMarker(markerOptions);
+
+        // 마커 저장
+        markerList.add(marker);
+
         Polyline polyline = MapsActivity.getMap().addPolyline(polylineOptions);
 
         // Save the polyline for removal
@@ -162,6 +183,14 @@ public class PolyLine {
         } else {
             Log.e("REMOVE_POLYLINE", "No Polyline found for path: " + encodedPath);
         }
+        if (!markerList.isEmpty()) {
+            for (Marker marker : markerList) {
+                if (marker != null) {
+                    marker.remove();
+                }
+            }
+            markerList.clear();
+        }
     }
 
     private static String encodePolyline(List<LatLng> path) {
@@ -208,6 +237,25 @@ public class PolyLine {
         }
         polylineMap.clear();
         Log.d("REMOVE_ALL_POLYLINES", "All polylines removed.");
+
+        if (!markerList.isEmpty()) {
+            for (Marker marker : markerList) {
+                if (marker != null) {
+                    marker.remove();
+                }
+            }
+            markerList.clear();
+        }
+    }
+    static public void markerRemove(){
+        if (!markerList.isEmpty()) {
+            for (Marker marker : markerList) {
+                if (marker != null) {
+                    marker.remove();
+                }
+            }
+            markerList.clear();
+        }
     }
 }
 

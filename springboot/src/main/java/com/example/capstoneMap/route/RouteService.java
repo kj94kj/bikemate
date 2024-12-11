@@ -110,4 +110,16 @@ public class RouteService {
     	
     	return ResponseEntity.ok(lengthRouteDtos);
     	}
+    
+    @Transactional
+    public ResponseEntity<List<RouteDto>> getRoutesByRecordUserId(@PathVariable Long userId){
+    	 List<Route> recordUserIdRoutes = routeRepository.findRoutesByRecordUserId(userId);
+    	 
+         List<RouteDto> recordUserIdRouteDtos = recordUserIdRoutes.stream()
+                 .map(route -> new RouteDto(route.getId(), route.getName(), route.getEncodedPath(), route.getLocationList(), route.getUserId(), 
+                 		route.getStartLocation(), route.getLength()))
+                 .collect(Collectors.toList());
+         
+         return ResponseEntity.ok(recordUserIdRouteDtos);
+    }
 }

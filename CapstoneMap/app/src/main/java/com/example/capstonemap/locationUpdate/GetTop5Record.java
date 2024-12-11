@@ -1,26 +1,29 @@
 package com.example.capstonemap.locationUpdate;
 
+import com.example.capstonemap.Racing.Racing;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class GetTop5Record {
     static UserRecordRepository userRecordRepository = new UserRecordRepository();
-    static List<UserRecordDto> top5userRecordDto = new ArrayList<>();
 
-    public static List<UserRecordDto> getTop5Record(Long userId, Long routeId) {
+    public static void getTop5Record(Long userId, Long routeId, OnTop5RecordsFetchedListener listener) {
         userRecordRepository.getTop5Record(userId, routeId,
-                // 성공 시 routeDtoList에 데이터 저장
+                // 성공 시 처리
                 top5Records -> {
-                    top5userRecordDto = top5Records;
-                    System.out.println("기록이 있습니다.");
+                    listener.onSuccess(top5Records); // 데이터를 콜백으로 전달
                 },
                 // 실패 시 처리
                 () -> {
-                    top5userRecordDto = null;
-                    System.out.println("기록이 없습니다.");
+                    listener.onFailure();
                 }
         );
+    }
 
-        return top5userRecordDto;
+    // 콜백 인터페이스 정의
+    public interface OnTop5RecordsFetchedListener {
+        void onSuccess(List<UserRecordDto> top5Records);
+        void onFailure();
     }
 }

@@ -76,6 +76,8 @@ public class GetRoutes {
                         List<RouteDto> newRoutes = getAllRoutes(); // 새로운 데이터를 가져옴
                         routeDtoList.clear(); // 기존 리스트를 비움
                         routeDtoList.addAll(newRoutes);
+                        binding.GetUserRoutesButton.performClick();
+
                     }
                 }
         );

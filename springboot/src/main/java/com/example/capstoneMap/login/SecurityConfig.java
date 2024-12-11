@@ -13,16 +13,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.example.capstoneMap.user.UserService;
+import com.example.capstoneMap.user.UserServiceJWT;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final UserService userService;
+    private final UserServiceJWT userService;
     private final JwtRequestFilter jwtRequestFilter;
 
-    public SecurityConfig(UserService userService, JwtRequestFilter jwtRequestFilter) {
+    public SecurityConfig(UserServiceJWT userService, JwtRequestFilter jwtRequestFilter) {
         this.userService = userService;
         this.jwtRequestFilter = jwtRequestFilter;
     }
@@ -58,5 +58,5 @@ public class SecurityConfig {
         AuthenticationManagerBuilder auth = http.getSharedObject(AuthenticationManagerBuilder.class);
         auth.userDetailsService(userService).passwordEncoder(passwordEncoder());
         return auth.build();
-    }
+    } 
 }

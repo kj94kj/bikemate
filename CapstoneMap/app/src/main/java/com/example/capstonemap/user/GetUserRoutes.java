@@ -14,7 +14,7 @@ public class GetUserRoutes {
     static List<RouteDto> userRouteDtoList = new ArrayList<>(); ;
 
 
-    private static List<RouteDto> getUserRoutes(Long userId) {
+    public static List<RouteDto> getUserRoutes(Long userId) {
         routeRepository.getUserRoutes(
                 userId,
                 // 성공 시 routeDtoList에 데이터 저장
@@ -50,7 +50,8 @@ public class GetUserRoutes {
         for (RouteDto route : userRouteDtoList) {
             routesText.append(route.toString()).append("\n");
         }
-        binding.routeTextView.setText(routesText.toString());
+        // binding.routeTextView.setText(routesText.toString());
+        // 12.10 뭔지 모르겠음.
     }
 
     // 인덱스로 루트 선택함.

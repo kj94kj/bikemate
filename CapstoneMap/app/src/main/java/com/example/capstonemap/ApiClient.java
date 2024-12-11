@@ -4,6 +4,7 @@ import com.example.capstonemap.locationUpdate.UserRecordApiService;
 import com.example.capstonemap.ranking.RankingApiService;
 import com.example.capstonemap.rival.RivalApiService;
 import com.example.capstonemap.routes.RouteApiService;
+import com.example.capstonemap.user.UserApiService;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -41,5 +42,9 @@ public class ApiClient {
     private static final RivalApiService rivalApiService = ApiClient.getClient().create(RivalApiService.class);
 
     public static RivalApiService getRivalApiService(){return rivalApiService;}
+
+    private static final UserApiService userApiService = ApiClient.getClient().create(UserApiService.class);
+
+    public static UserApiService getUserApiService(){return userApiService;}
 
 }

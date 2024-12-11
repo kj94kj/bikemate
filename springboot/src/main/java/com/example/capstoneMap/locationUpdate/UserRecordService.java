@@ -42,11 +42,29 @@ public class UserRecordService {
             throw new IllegalArgumentException("Route with ID " + userRecordDto.getId() + " already exists.");
         }
     	
-        System.out.println("Dto: " + userRecordDto.toString());
-        UserRecord userRecord = userRecordDto.toEntity();
-        System.out.println("entity: " + userRecord.toString());
-        route.addUserRecord(userRecord);
-        routeRepository.save(route);
+        // 기존 기록 조회
+        UserRecord existingRecord = route.getUserRecords().stream()
+                .filter(record -> record.getUserId().equals(userId))
+                .findFirst()
+                .orElse(null);
+
+        if (existingRecord != null) {
+            // 기존 기록 갱신
+            if (existingRecord.getElapsedTime() > userRecordDto.getElapsedTime()) {
+                existingRecord.setElapsedTime(userRecordDto.getElapsedTime());
+                existingRecord.setLocationList(userRecordDto.getLocationList());
+                routeRepository.save(route); // 변경 저장
+                System.out.println("기록 갱신 완료: " + existingRecord);
+            } else {
+                System.out.println("기존 기록이 더 빠릅니다. 갱신하지 않습니다.");
+            }
+        } else {
+            // 새 기록 추가
+            System.out.println("새 기록 추가: " + userRecordDto.toString());
+            UserRecord userRecord = userRecordDto.toEntity();
+            route.addUserRecord(userRecord);
+            routeRepository.save(route);
+        }
         
         RouteDto routeDto = new RouteDto(route.getId(), route.getName(), route.getEncodedPath(), route.getLocationList(), route.getUserId(), 
         		route.getStartLocation(), route.getLength());

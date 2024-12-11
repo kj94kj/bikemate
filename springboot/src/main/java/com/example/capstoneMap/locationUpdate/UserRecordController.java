@@ -46,4 +46,5 @@ public class UserRecordController {
     public ResponseEntity<List<UserRecordDto>> getTop5Record(@PathVariable("userId") Long userId, @PathVariable("routeId") Long routeId){
     	return userRecordService.getTop5Record(userId, routeId);
     }
+    
 }

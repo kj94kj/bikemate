@@ -26,13 +26,16 @@ public class FilterDialog {
 
         SeekBar minSeekBar = dialogView.findViewById(R.id.min_seekbar);
         SeekBar maxSeekBar = dialogView.findViewById(R.id.max_seekbar);
-        TextView minValueText = dialogView.findViewById(R.id.min_value_text);
-        TextView maxValueText = dialogView.findViewById(R.id.max_value_text);
+        TextView rangeValueText = dialogView.findViewById(R.id.range_value_text);
 
         minSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                minValueText.setText("Min Value: " + progress);
+                int maxValue = maxSeekBar.getProgress();
+                if (progress > maxValue) {
+                    minSeekBar.setProgress(maxValue); // 최소값이 최대값을 넘지 않도록 제한
+                }
+                rangeValueText.setText("Range: " + minSeekBar.getProgress() + " km - " + maxSeekBar.getProgress() + " km");
             }
 
             @Override
@@ -45,7 +48,11 @@ public class FilterDialog {
         maxSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                maxValueText.setText("Max Value: " + progress);
+                int minValue = minSeekBar.getProgress();
+                if (progress < minValue) {
+                    maxSeekBar.setProgress(minValue); // 최대값이 최소값보다 작지 않도록 제한
+                }
+                rangeValueText.setText("Range: " + minSeekBar.getProgress() + " km - " + maxSeekBar.getProgress() + " km");
             }
 
             @Override
@@ -56,8 +63,8 @@ public class FilterDialog {
         });
 
         dialogView.findViewById(R.id.apply_button).setOnClickListener(v -> {
-            int minLength = minSeekBar.getProgress();
-            int maxLength = maxSeekBar.getProgress();
+            int minLength = minSeekBar.getProgress()*1000;
+            int maxLength = maxSeekBar.getProgress()*1000;
             listener.onFilterApplied(minLength, maxLength);
         });
 

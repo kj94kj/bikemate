@@ -21,7 +21,7 @@ public class DeleteRoute {
         );
     }
 
-    public static void deleteButton(ActivityMapsBinding binding, Long routeId, Long userId){
+    /*public static void deleteButton(ActivityMapsBinding binding, Long routeId, Long userId){
         binding.DeleteButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -30,5 +30,5 @@ public class DeleteRoute {
                     }
                 }
         );
-    }
+    }*/
 }

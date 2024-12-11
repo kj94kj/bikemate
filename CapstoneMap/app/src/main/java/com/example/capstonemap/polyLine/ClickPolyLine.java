@@ -111,7 +111,7 @@ public class ClickPolyLine {
         map.setOnMapLongClickListener(null);
     }
 
-    private static String[] getSubLocalityAndFeatureName(Context context, double latitude, double longitude) {
+    public static String[] getSubLocalityAndFeatureName(Context context, double latitude, double longitude) {
         Geocoder geocoder = new Geocoder(context, Locale.KOREA);
         try {
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);

@@ -1,27 +1,36 @@
 package com.example.capstoneMap.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
+	
 
     @Autowired
     private UserRepository userRepository;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found");
+	
+    @Transactional
+    public ResponseEntity<UserDto> saveLogin(UserDto userDto){
+    	User user = userDto.toEntity();
+    	userRepository.save(user);
+    	
+    	return ResponseEntity.ok(userDto);
+    }
+    
+    public boolean authenticate(UserDto userDto) {
+        User user = userRepository.findByUsername(userDto.getUsername());
+        return user != null && user.getPassword().equals(userDto.getPassword()); // 간단한 검증
+    }
+    
+    public Long getUserId(UserDto userDto) {
+        User user = userRepository.findByUsername(userDto.getUsername());
+        if (user != null) {
+            return user.getId();
+        } else {
+            return null;
         }
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .authorities("USER")
-                .build();
     }
 }

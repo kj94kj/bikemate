@@ -18,9 +18,18 @@ import com.example.capstonemap.polyLine.PolyLine;
 import com.example.capstonemap.routes.RouteDto;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 
 import android.media.SoundPool;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -78,6 +87,8 @@ public class UserUpdateInfo {
     // 현재 달리고있는 폴리라인의 List<LatLng>을 set해야함.
     private List<LatLng> polyline;
 
+    public static String finish;
+
     Context context = MapsActivity.getAppContext();
     SoundPool soundPool = new SoundPool.Builder().setMaxStreams(2).build();
     int soundOne = soundPool.load(context, R.raw.short_beep, 1);
@@ -127,11 +138,13 @@ public class UserUpdateInfo {
             vibrator.vibrate(200);
             soundPool.play(soundOne, 1, 1, 0, 0, 1);
             System.out.println("진동소리 1등");
+            Toast.makeText(MapsActivity.getAppContext(), "1등 입니다.", Toast.LENGTH_SHORT).show();
         }else if(raceRanking == 2){
             vibrator.vibrate(new long[]{0, 200, 150, 200}, -1); // 패턴: [시작 지연, 진동, 쉬는 시간, 진동]
             soundPool.play(soundOne, 1, 1, 0, 0, 1);
             new Handler().postDelayed(() -> soundPool.play(soundOne, 1, 1, 0, 0, 1), 300);
             System.out.println("진동소리2등");
+            Toast.makeText(MapsActivity.getAppContext(), "2등 입니다.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -157,6 +170,9 @@ public class UserUpdateInfo {
         if(oldMyRecord == null){
             Log.d("end", "현재 기록은 "+curElapsedTime+" 입니다.");
             Log.d("end", "기록이 저장 됩니다.");
+
+            String a = "현재 기록은 "+curElapsedTime+" 입니다.";
+            String b = "\n기록이 저장 됩니다.";
             myRecordDto.setUserId(userId);
             myRecordDto.setRouteId(routeId);
             myRecordDto.setLocationList(locationList);
@@ -167,6 +183,8 @@ public class UserUpdateInfo {
 
             // 이거하면 자동으로 랭킹은 저장됨.
             SaveMyRecord.saveMyRecord(myRecordDto, userId, routeId);
+
+            finish = a+b;
         }else{
             String oldElapsedTime = "00:00:00";
 
@@ -182,10 +200,15 @@ public class UserUpdateInfo {
 
             // 이 메시지가 경주가 끝나면 출력되야함.
             Log.d("end", "현재 기록은 "+curElapsedTime+" 입니다.");
-            Log.d("end", "이전 기록은 "+oldElapsedTime+" 입니다.");
+            Log.d("end", "다른 기록은 "+oldElapsedTime+" 입니다.");
+
+            String a="현재 기록은 "+curElapsedTime+" 입니다.";
+            String b="\n다른 기록은 "+oldElapsedTime+" 입니다.";
+            String sin ="\n";
 
             if(oldMyRecord.getElapsedTime() - elapsedTime > 0){
-                System.out.println("기록이 갱신 됩니다.");
+                Log.d("sin", "기록이 갱신 됩니다.");
+                sin="기록이 갱신 됩니다.";
                 myRecordDto.setUserId(userId);
                 myRecordDto.setRouteId(routeId);
                 myRecordDto.setLocationList(locationList);
@@ -194,6 +217,8 @@ public class UserUpdateInfo {
                 // 이거하면 자동으로 랭킹은 저장됨.
                 SaveMyRecord.saveMyRecord(myRecordDto, userId, routeId);
             }
+            finish = a+b+sin;
+
         }
     }
 
@@ -205,5 +230,19 @@ public class UserUpdateInfo {
     public void setRacingDto(RouteDto routeDto){
         racingDto = routeDto;
         polyline = PolyLine.decodePolyline(racingDto.getEncodedPath());
+    }
+
+    public void showCenteredSnackbar(View parentView, String message) {
+        Snackbar snackbar = Snackbar.make(parentView, message, Snackbar.LENGTH_LONG);
+
+        // Snackbar의 View 가져오기
+        View snackbarView = snackbar.getView();
+
+        // Snackbar를 중앙으로 이동
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snackbarView.getLayoutParams();
+        params.gravity = Gravity.CENTER;
+        snackbarView.setLayoutParams(params);
+
+        snackbar.show();
     }
 }

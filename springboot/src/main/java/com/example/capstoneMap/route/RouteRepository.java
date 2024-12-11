@@ -16,4 +16,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     Optional<UserRecord> findByRouteIdAndUserId(@Param("routeId") Long routeId, @Param("userId") Long userId);
 	
 	List<Route> findByLengthBetween(Double minLength, Double maxLength);
+	
+    @Query("SELECT r FROM Route r JOIN r.userRecords ur WHERE ur.userId = :userId")
+    List<Route> findRoutesByRecordUserId(@Param("userId") Long userId);
 }

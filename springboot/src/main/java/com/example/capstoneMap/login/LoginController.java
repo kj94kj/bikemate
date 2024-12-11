@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.capstoneMap.user.User;
 import com.example.capstoneMap.user.UserRepository;
-import com.example.capstoneMap.user.UserService;
+import com.example.capstoneMap.user.UserServiceJWT;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,14 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LoginController {
 
-    @Autowired
+   @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
     
     @Autowired
-    private UserService userService;
+    private UserServiceJWT userService;
     
     @Autowired
     private AuthenticationManager authenticationManager;
