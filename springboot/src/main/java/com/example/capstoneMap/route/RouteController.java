@@ -12,7 +12,7 @@ import com.example.capstoneMap.user.UserServiceJWT;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://10.0.2.2:8080") 
+@CrossOrigin(origins = "http://bikemate.herokuapp.com") 
 public class RouteController {
 	
 	@Autowired
@@ -52,4 +52,9 @@ public class RouteController {
     public ResponseEntity<List<RouteDto>> getRoutesByRecordUserId(@PathVariable Long userId){
     	return routeService.getRoutesByRecordUserId(userId);
     }
+
+        @GetMapping("/health")
+        public String healthCheck() {
+            return "Server is running!";
+        }
 }

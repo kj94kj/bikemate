@@ -29,6 +29,7 @@ public class Ranking {
 	@Column
 	private Long routeId;
 	private Long elapsedTime;
+	@Column(name = "route_rank")
 	private int rank;
 	
 	public Ranking(Long userId, Long routeId, Long elapsedTime, int rank) {

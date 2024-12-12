@@ -112,7 +112,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // 지정한 길이의 모든 routeDtoList를 받는 dto
     private List<RouteDto> allLengthRouteDtoList = new ArrayList<>();
-    public static UserDto userDto;
+    public static UserDto userDto = new UserDto(99999L, "ferffefef", "frefe");
+    // 여기 신경쓰기.
 
     // 루트에 있을 때만 UserUpdateInfo에 좌표값, 속도값을 넣으려고함.
     // RouteInOut과 연관된 변수.
@@ -162,7 +163,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (!isLogined && userDto == null) {
             Log.d("login", "9999l로바뀜");
-            userDto = new UserDto(99999L, "ferffefef", "frefe");
+           // userDto = new UserDto(99999L, "ferffefef", "frefe");
         }
 
         appContext = getApplicationContext();

@@ -19,7 +19,7 @@ import com.example.capstoneMap.user.User;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://10.0.2.2:8080") 
+@CrossOrigin(origins = "http://bikemate.herokuapp.com") 
 public class UserRecordController {
 	
 	@Autowired
