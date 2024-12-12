@@ -58,14 +58,15 @@ public class ClickPolyLine {
                     startLocation[0] = origin[0].latitude;
                     startLocation[1] = origin[0].longitude;
 
+                    List<LatLng> path=PolyLine.decodePolyline(encodedPath);
+                    PolyLine.drawPolylineOnMap(path);
+                    LatLng startPoint = path.get(0);
 
-                    PolyLine.drawPolylineOnMap(PolyLine.decodePolyline(encodedPath));
-
-                    Double length = DistancePolyLine.calculateTotalLength(DistancePolyLine.encodedToLatLng(encodedPath));
-
-                    String[] locationDetails = getSubLocalityAndFeatureName(MapsActivity.getAppContext(), startLocation[0], startLocation[1]);
+                    String[] locationDetails =  ClickPolyLine.getSubLocalityAndFeatureName(MapsActivity.getAppContext(), startPoint.latitude, startPoint.longitude);
                     String subLocality = locationDetails[0];
                     String featureName = locationDetails[1];
+
+                    Double length = DistancePolyLine.calculateTotalLength(DistancePolyLine.encodedToLatLng(encodedPath));
 
                     String fullName=subLocality+" "+featureName;
 

@@ -34,13 +34,13 @@ public class DistancePolyLine {
 
         // 2. 현재 위치가 폴리라인 상에 있는지 확인
         // 여기부분을 바꿀 수 있음. 범위같은거 지정해서
-        if (!PolyUtil.isLocationOnPath(currentLocation, polyline, true, 10)) {
+        if (!PolyUtil.isLocationOnPath(currentLocation, polyline, true, 40)) {
             System.out.println("현재 위치가 경로 근처에 없습니다.");
             return -1; // 경로에서 벗어난 경우
         }
 
         // 3. 현재 위치의 폴리라인 상 가장 가까운 인덱스 찾기
-        int closestIndex = PolyUtil.locationIndexOnPath(currentLocation, polyline, true, 10);
+        int closestIndex = PolyUtil.locationIndexOnPath(currentLocation, polyline, true, 40);
 
         // 4. 누적 거리 계산
         double totalDistance = 0;

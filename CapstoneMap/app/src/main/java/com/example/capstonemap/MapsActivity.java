@@ -112,7 +112,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // 지정한 길이의 모든 routeDtoList를 받는 dto
     private List<RouteDto> allLengthRouteDtoList = new ArrayList<>();
-    public static UserDto userDto = new UserDto(99999L, "ferffefef", "frefe");
+    public static UserDto userDto;
     // 여기 신경쓰기.
 
     // 루트에 있을 때만 UserUpdateInfo에 좌표값, 속도값을 넣으려고함.
@@ -163,12 +163,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (!isLogined && userDto == null) {
             Log.d("login", "9999l로바뀜");
-           // userDto = new UserDto(99999L, "ferffefef", "frefe");
+           //userDto = new UserDto(99999L, "ferffefef", "frefe");
         }
 
         appContext = getApplicationContext();
 
         //임시적인 유저생성 지워야함.
+        userDto= new UserDto(99999L, "ferffefef", "frefe");
 
         // 로그인 다이얼로그 표시
         if(!isLogined){
@@ -187,7 +188,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // 모든 루트 담음.
+        // 모든 루트 담음. 12.12 여기
         allRouteDtoList = new ArrayList<>();
         allRouteDtoList = GetRoutes.getAllRoutes();
         userIdRecordDtoList = new ArrayList();
@@ -235,11 +236,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         buttonRouteManagement.setOnClickListener(v -> {
             // 코스 관리 액티비티로 넘어감.
             isMapReady=false;
-            arrayIdRecordDtoList = (ArrayList<RouteDto>) userIdRecordDtoList;
-            intent.putExtra("userIdRecordDtoList", arrayIdRecordDtoList);
             userIdRecordDtoList = GetRoutes.getRoutesByRecordUserId(userDto.getId());
             // 여기여기
             // arrayAllRouteDtoList = (ArrayList<RouteDto>) allRouteDtoList;
+            arrayIdRecordDtoList = (ArrayList<RouteDto>) userIdRecordDtoList;
+            intent.putExtra("userIdRecordDtoList", arrayIdRecordDtoList);
             arrayAllRouteDtoList = (ArrayList<RouteDto>) GetUserRoutes.getUserRoutes(userDto.getId());
             intent.putExtra("allRouteDtoList", arrayAllRouteDtoList);
             intent.putExtra("userId", userDto.getId());
@@ -404,6 +405,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             PolyLine.removeAllPolylines();
             ClickPolyLine.disablePolylineDrawing(mMap);
             ClickPolyLine.clickPolyLine(mMap);
+            arrayAllRouteDtoList = (ArrayList<RouteDto>) GetUserRoutes.getUserRoutes(userDto.getId());
+            arrayIdRecordDtoList = (ArrayList<RouteDto>) userIdRecordDtoList;
             saveRouteButton.setVisibility(View.VISIBLE);
             cancelRouteButton.setVisibility(View.VISIBLE);
             explanationText.setVisibility(View.VISIBLE);
@@ -886,6 +889,5 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             throw new IllegalArgumentException("Context must be an instance of AppCompatActivity.");
         }
     }
-
 
 }

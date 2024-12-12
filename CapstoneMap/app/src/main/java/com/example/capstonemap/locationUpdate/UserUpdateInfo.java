@@ -122,6 +122,10 @@ public class UserUpdateInfo {
         else
             rankingNow=2;
 
+        if(meDistance==-1 || otherDistance==-1){
+            rankingNow=raceRanking;
+        }
+
         if(counter >= oldOtherRecord.getLocationList().size())
             rankingNow=2;
 

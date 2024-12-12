@@ -16,7 +16,9 @@ public class RankingDto {
     private Long id;
     private Long userId;     // 사용자 ID
     private Long routeId;// 경로 ID
-    @SerializedName("route_rank")
+
+    // @SerializedName("route_rank")
     private int rank;        // 등수
+
     private long elapsedTime; // 소요 시간 (빠른 순위 조회를 위해 포함)
 }

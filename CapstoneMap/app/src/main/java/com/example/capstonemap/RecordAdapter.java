@@ -61,7 +61,7 @@ public class RecordAdapter extends BaseAdapter {
             curElapsedTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
         }
 
-        userIdText.setText(String.valueOf(ranking.getUserId()));
+        userIdText.setText("username"+String.valueOf(ranking.getUserId()));
         elapsedTimeText.setText(curElapsedTime);
         rankText.setText(ranking.getRank() + "등");
 

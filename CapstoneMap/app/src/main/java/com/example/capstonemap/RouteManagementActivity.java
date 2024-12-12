@@ -17,6 +17,7 @@ import com.example.capstonemap.user.UserDto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,15 +44,17 @@ public class RouteManagementActivity extends AppCompatActivity {
         Long userId = (Long) getIntent().getSerializableExtra("userId");
 
         if (boundedRouteDto != null && allRouteDto != null) {
-            Set<Long> boundedIds = boundedRouteDto.stream()
-                    .map(RouteDto::getId)
-                    .collect(Collectors.toSet());
+            Map<Long, RouteDto> routeMap = Stream.concat(boundedRouteDto.stream(), allRouteDto.stream())
+                    .collect(Collectors.toMap(
+                            RouteDto::getId,   // Key: RouteDto의 ID
+                            route -> route,    // Value: RouteDto 객체
+                            (existing, replacement) -> existing // 중복 시 기존 값 유지
+                    ));
 
-            List<RouteDto> intersection = allRouteDto.stream()
-                    .filter(route -> boundedIds.contains(route.getId()))
-                    .collect(Collectors.toList());
+            // Map에서 중복 제거된 RouteDto를 List로 변환
+            List<RouteDto> union = new ArrayList<>(routeMap.values());
 
-            RouteDtoAdapter adapter = new RouteDtoAdapter(this, intersection, new RouteDtoAdapter.OnRouteActionListener() {
+            RouteDtoAdapter adapter = new RouteDtoAdapter(this, union, new RouteDtoAdapter.OnRouteActionListener() {
                 @Override
                 public void onRouteClick(RouteDto route) {
                     intentRM.putExtra("source", "RouteManagementActivity");
